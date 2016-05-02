@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Voxeet Sample</string>
+    <string name="action_settings">Settings</string>
+    <string name="demo">Conference demo</string>
+    <string name="create_conf">Create Conference</string>
+    <string name="participant_number">#%1$d</string>
+    <string name="appId">rrd</string>
+    <string name="password">voxeet</string>
+</resources>
