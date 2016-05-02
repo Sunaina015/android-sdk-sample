@@ -13,7 +13,7 @@ To install the SDK directly into your Android project using the Grade build syst
 
 ```java
 dependencies {
-    compile 'com.voxeet.sdk:core:0.8.1'
+    compile 'com.voxeet.sdk:core:0.8.2'
 }
 ```
 ### Recommended settings for API compatibility:
@@ -226,7 +226,7 @@ public void onEvent(MessageReceived event) {
 ```
 
 ## Version
-0.8.0
+0.8.2
 
 ## Tech
 
@@ -243,13 +243,9 @@ A sample application is available on this [public repository][sample] on GitHub.
  
 ## Todos
 
-**TO BE ADDED**
-
    [Official Android Documentation]: <http://developer.android.com/training/permissions/requesting.html>
    [sample]: <https://github.com/voxeet/android-sdk-sample.git>
    [GreenRobot/EventBus]: <https://github.com/greenrobot/EventBus>
    [Jackson]: <https://github.com/FasterXML/jackson>
    [RxAndroid]: <https://github.com/ReactiveX/RxAndroid>
    [Retrofit2]: <http://square.github.io/retrofit/>
-
-
