@@ -226,7 +226,7 @@ public void onEvent(MessageReceived event) {
 ```
 
 ## Version
-0.8.2
+0.8.4
 
 ## Tech
 
