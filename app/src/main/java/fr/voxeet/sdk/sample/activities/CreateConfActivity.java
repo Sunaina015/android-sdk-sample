@@ -22,6 +22,9 @@ import voxeet.com.sdk.events.success.ConferenceJoined;
 import voxeet.com.sdk.events.success.ParticipantAdded;
 import voxeet.com.sdk.events.success.ParticipantUpdated;
 import voxeet.com.sdk.core.VoxeetSdk;
+import voxeet.com.sdk.exception.VoxeetSdkException;
+
+import static fr.voxeet.sdk.sample.adapters.ParticipantAdapter.*;
 
 /**
  * Created by RomainBenmansour on 4/21/16.
@@ -130,7 +133,6 @@ public class CreateConfActivity extends AppCompatActivity {
         handler.post(new Runnable() {
             @Override
             public void run() {
-
                 if (!isDemo) {
                     aliasId.setVisibility(View.VISIBLE);
                     aliasId.setText(event.getAliasId());
@@ -158,14 +160,20 @@ public class CreateConfActivity extends AppCompatActivity {
     }
 
     @Subscribe
-    public void onEvent(MessageReceived event) { Log.e(TAG, event.getMessage()); }
+    public void onEvent(MessageReceived event) {
+
+        ParticipantAdapter.RoomPosition position = adapter.getUserPosition(event.getUserId());
+
+        VoxeetSdk.playSound("elephant_mono.mp3", position.angle, position.distance);
+
+        Log.e(TAG, event.getMessage());
+    }
 
     @Subscribe
     public void onEvent(final ParticipantAdded event) {
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override
             public void run() {
-                Log.e(TAG, event.getConferenceUser().getUserId());
                 adapter.addParticipant(event.getConferenceUser());
                 adapter.notifyDataSetChanged();
             }

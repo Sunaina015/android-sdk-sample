@@ -16,6 +16,6 @@ public class SampleApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
-        VoxeetSdk.sdkInitialize(this, getString(R.string.appId), getString(R.string.password));
+        VoxeetSdk.sdkInitialize(this, getString(R.string.consumer_key), getString(R.string.consumer_secret));
     }
 }

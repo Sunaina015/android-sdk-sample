@@ -13,7 +13,9 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import fr.voxeet.sdk.sample.R;
 import voxeet.com.sdk.models.ConferenceUser;
@@ -32,20 +34,36 @@ public class ParticipantAdapter extends BaseAdapter {
 
     private LayoutInflater inflater;
 
+    private Map<String, RoomPosition> positionMap;
+
+    public class RoomPosition {
+        public double angle;
+        public double distance;
+
+        public RoomPosition(double angle, double distance) {
+            this.angle = angle;
+            this.distance = distance;
+        }
+    }
+
     public ParticipantAdapter(Context context) {
         this.context = context;
 
         this.participants = new ArrayList<>();
 
         this.inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+        this.positionMap = new HashMap<>();
     }
 
     public void updateParticipant(ConferenceUser conferenceUser) {
 
         if (conferenceUser.getStatus().equalsIgnoreCase(ConferenceUser.LEFT)) {
             ConferenceUser user = doesContain(conferenceUser);
-            if (user != null)
+            if (user != null) {
+                positionMap.remove(conferenceUser.getUserId());
                 participants.remove(user);
+            }
         }
     }
 
@@ -62,8 +80,10 @@ public class ParticipantAdapter extends BaseAdapter {
 
     public void addParticipant(ConferenceUser conferenceUser) {
 
-        if (doesContain(conferenceUser) == null)
-            this.participants.add(conferenceUser);
+        if (doesContain(conferenceUser) == null) {
+            participants.add(conferenceUser);
+            positionMap.put(conferenceUser.getUserId(), new RoomPosition(0, 0.5));
+        }
     }
 
     @Override
@@ -148,15 +168,17 @@ public class ParticipantAdapter extends BaseAdapter {
 
     private void updatePosition(String userId, int x, int y) {
 
-        double xValue = ((double)x / 100.0) - 1.0;
-        double yValue = (double)y / 100.0;
+        double angle = ((double)x / 100.0) - 1.0;
 
-        double angle2 = ((Math.atan2(xValue, yValue) * 180.0) / Math.PI);
-        double distance = Math.sqrt(xValue * xValue + yValue * yValue) * 10;
+        double distance = (double)y / 100.0;
 
-        Log.e(TAG, "xValue : " + xValue + " - YValue : " + yValue + " - angle : " + angle2 + " - distance : " + distance);
+        positionMap.put(userId, new RoomPosition(angle, distance));
 
-        VoxeetSdk.changePeerPosition(userId, angle2, distance);
+        VoxeetSdk.changePeerPosition(userId, angle, distance);
+    }
+
+    public RoomPosition getUserPosition(String userId) {
+        return positionMap.get(userId);
     }
 
     private class ViewHolder {

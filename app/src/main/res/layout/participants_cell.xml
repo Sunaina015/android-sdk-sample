@@ -61,7 +61,7 @@
             android:gravity="center"
             android:textColor="@color/white"
             android:textSize="18sp"
-            android:text="position"
+            android:text="distance"
             />
 
     </LinearLayout>
@@ -75,7 +75,7 @@
         <SeekBar
             android:id="@+id/angle"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_height="30dp"
             android:layout_weight="1"
             android:progress="100"
             android:max="200" />
@@ -83,7 +83,7 @@
         <SeekBar
             android:id="@+id/distance"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_height="30dp"
             android:progress="50"
             android:layout_weight="1"
             android:max="100" />

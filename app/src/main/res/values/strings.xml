@@ -4,6 +4,6 @@
     <string name="demo">Conference demo</string>
     <string name="create_conf">Create Conference</string>
     <string name="participant_number">#%1$d</string>
-    <string name="appId">rrd</string>
-    <string name="password">voxeet</string>
+    <string name="consumer_key">consumer key</string>
+    <string name="consumer_secret">consumer secret</string>
 </resources>
