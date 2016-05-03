@@ -1,9 +1,11 @@
 <resources>
+    <!--/Replace with the one given by Voxeet-->
+    <string name="consumer_key">consumer key</string>
+    <string name="consumer_secret">consumer secret</string>
+
     <string name="app_name">Voxeet Sample</string>
     <string name="action_settings">Settings</string>
     <string name="demo">Conference demo</string>
     <string name="create_conf">Create Conference</string>
     <string name="participant_number">#%1$d</string>
-    <string name="consumer_key">consumer key</string>
-    <string name="consumer_secret">consumer secret</string>
 </resources>
