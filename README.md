@@ -248,7 +248,7 @@ The Voxeet Android SDK uses a number of open source projects to work properly:
 
 A sample application is available on this [public repository][sample] on GitHub.
 
-## Todos
+© Voxeet, 2016
 
    [Official Android Documentation]: <http://developer.android.com/training/permissions/requesting.html>
    [sample]: <https://github.com/voxeet/android-sdk-sample.git>
