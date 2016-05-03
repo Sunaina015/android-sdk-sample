@@ -9,18 +9,18 @@ The SDK is a Java library allowing users to:
 
 ### Installing the Android SDK using Gradle
 
-To install the SDK directly into your Android project using the Grade build system and an IDE like Android Studio, add the following entry: "compile 'com.voxeet.sdk:core:0.8.4'" to your build.gradle file as shown below:
+To install the SDK directly into your Android project using the Grade build system and an IDE like Android Studio, add the following entry: "compile 'com.voxeet.sdk:core:0.8.42'" to your build.gradle file as shown below:
 
 ```java
 dependencies {
-    compile 'com.voxeet.sdk:core:0.8.4'
+    compile 'com.voxeet.sdk:core:0.8.42'
 }
 ```
 ### Recommended settings for API compatibility:
 
 ```java
 apply plugin: 'com.android.application'
- 
+
 android {
     compileSdkVersion 21+
     defaultConfig {
@@ -51,7 +51,7 @@ ActivityCompat.requestPermissions(this,
 ```
 
 See the [Official Android Documentation] for more details.
- 
+
 ### Consumer Key & Secret
 
 Add your consumer key & secret to the xml string file of your application.
@@ -60,11 +60,11 @@ Add your consumer key & secret to the xml string file of your application.
  <string name="consumer_key">your consumer key</string>
  <string name="consumer_password">your consumer password</string>
 ```
- 
+
 ## Available methods
-  
+
 ### Initializing  
-  
+
 ```java
 // To be called from the application class
 VoxeetSdk.sdkInitialize(Context context, String consumerKey, String consumerSecret);
@@ -103,6 +103,13 @@ VoxeetSdk.leaveConference();
 VoxeetSdk.changePeerPosition(String userId, double x, double y);
 ```
 
+### Playing a sound
+
+```java
+// Sound has to be placed in the asset folder
+VoxeetSdk.playSound(String path, double angle, double distance);
+```
+
 ### Sending message in a conference
 
 ```java
@@ -139,7 +146,7 @@ Initialize the SDK in the onCreate() method of your application class:
 @Override
 public void onCreate() {
     super.onCreate();
-    VoxeetSdk.sdkInitialize(this, consumerKey, consumerSecret); 
+    VoxeetSdk.sdkInitialize(this, consumerKey, consumerSecret);
 }
 ```
 
@@ -163,7 +170,7 @@ protected void onDestroy() {
 
 ## Events
 
-The SDK will dispatch events to the suscribed classes such as activities and fragments holding the conferences. To get notified, the only necessary step is to add those 4 methods below: 
+The SDK will dispatch events to the suscribed classes such as activities and fragments holding the conferences. To get notified, the only necessary step is to add those 4 methods below:
 
 
 ### Conference joined
@@ -226,7 +233,7 @@ public void onEvent(MessageReceived event) {
 ```
 
 ## Version
-0.8.4
+0.8.42
 
 ## Tech
 
@@ -240,7 +247,7 @@ The Voxeet Android SDK uses a number of open source projects to work properly:
 ## Sample Application
 
 A sample application is available on this [public repository][sample] on GitHub.
- 
+
 ## Todos
 
    [Official Android Documentation]: <http://developer.android.com/training/permissions/requesting.html>

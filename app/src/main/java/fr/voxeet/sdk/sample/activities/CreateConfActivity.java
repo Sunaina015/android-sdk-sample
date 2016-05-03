@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -162,11 +163,13 @@ public class CreateConfActivity extends AppCompatActivity {
     @Subscribe
     public void onEvent(MessageReceived event) {
 
-        ParticipantAdapter.RoomPosition position = adapter.getUserPosition(event.getUserId());
+        if (event.getMessage().equals("sound")) {
+            ParticipantAdapter.RoomPosition position = adapter.getUserPosition(event.getUserId());
 
-        VoxeetSdk.playSound("elephant_mono.mp3", position.angle, position.distance);
+            VoxeetSdk.playSound("elephant_mono.mp3", position.angle, position.distance);
+        }
 
-        Log.e(TAG, event.getMessage());
+        Toast.makeText(this, event.getMessage(), Toast.LENGTH_SHORT).show();
     }
 
     @Subscribe

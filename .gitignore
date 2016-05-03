@@ -1,3 +1,5 @@
+/app/src/main/res/values/third_party.xml
+
 /.idea/libraries
 
 /captures
@@ -45,3 +47,4 @@ captures/
 
 # Keystore files
 *.jks
+
