@@ -11,21 +11,18 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.greenrobot.eventbus.Subscribe;
 
 import fr.voxeet.sdk.sample.R;
 import fr.voxeet.sdk.sample.adapters.ParticipantAdapter;
+import fr.voxeet.sdk.sample.dialogs.ConferenceOutput;
 import voxeet.com.sdk.events.success.ConferenceLeft;
 import voxeet.com.sdk.events.success.MessageReceived;
 import voxeet.com.sdk.events.success.ConferenceJoined;
 import voxeet.com.sdk.events.success.ParticipantAdded;
 import voxeet.com.sdk.events.success.ParticipantUpdated;
 import voxeet.com.sdk.core.VoxeetSdk;
-import voxeet.com.sdk.exception.VoxeetSdkException;
-
-import static fr.voxeet.sdk.sample.adapters.ParticipantAdapter.*;
 
 /**
  * Created by RomainBenmansour on 4/21/16.
@@ -42,7 +39,13 @@ public class CreateConfActivity extends AppCompatActivity {
 
     private ParticipantAdapter adapter;
 
+    private ViewGroup conferenceOptions;
+
     private Button join;
+
+    private Button audioRoutes;
+
+    private Button mute;
 
     private Button sendBroadcast;
 
@@ -56,6 +59,8 @@ public class CreateConfActivity extends AppCompatActivity {
 
     private boolean isDemo;
 
+    private ConferenceOutput conferenceOutput = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,6 +72,8 @@ public class CreateConfActivity extends AppCompatActivity {
         this.joinLayout = (ViewGroup) findViewById(R.id.join_conf_layout);
 
         this.aliasId = (TextView) findViewById(R.id.conference_alias);
+
+        this.conferenceOptions = (ViewGroup) findViewById(R.id.conference_options);
 
         this.join = (Button) findViewById(R.id.join);
         this.join.setOnClickListener(new View.OnClickListener() {
@@ -101,6 +108,38 @@ public class CreateConfActivity extends AppCompatActivity {
             }
         });
 
+        this.audioRoutes = (Button) findViewById(R.id.audio_routes);
+        this.audioRoutes.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (conferenceOutput != null) {
+                    if (conferenceOutput.isVisible()) {
+                        conferenceOutput.dismiss();
+                    } else {
+                        conferenceOutput.show(CreateConfActivity.this.getFragmentManager(), ConferenceOutput.TAG);
+                    }
+                }
+            }
+        });
+
+        this.mute = (Button) findViewById(R.id.mute);
+        this.mute.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                boolean muted = !VoxeetSdk.isMuted();
+
+                if (muted)
+                    mute.setText("Muted");
+                else
+                    mute.setText("Not Muted");
+
+                VoxeetSdk.muteConference(muted);
+            }
+        });
+
+        this.conferenceOutput = new ConferenceOutput(this);
+
         this.handler = new Handler(Looper.getMainLooper());
 
         if (getIntent().hasExtra("joinConf") && getIntent().getBooleanExtra("joinConf", false))
@@ -134,12 +173,13 @@ public class CreateConfActivity extends AppCompatActivity {
         handler.post(new Runnable() {
             @Override
             public void run() {
+
                 if (!isDemo) {
                     aliasId.setVisibility(View.VISIBLE);
                     aliasId.setText(event.getAliasId());
                 }
 
-                leave.setVisibility(View.VISIBLE);
+                conferenceOptions.setVisibility(View.VISIBLE);
             }
         });
     }
@@ -163,13 +203,11 @@ public class CreateConfActivity extends AppCompatActivity {
     @Subscribe
     public void onEvent(MessageReceived event) {
 
-        if (event.getMessage().equals("sound")) {
-            ParticipantAdapter.RoomPosition position = adapter.getUserPosition(event.getUserId());
+        ParticipantAdapter.RoomPosition position = adapter.getUserPosition(event.getUserId());
 
-            VoxeetSdk.playSound("elephant_mono.mp3", position.angle, position.distance);
-        }
+        VoxeetSdk.playSound("elephant_mono.mp3", position.angle, position.distance);
 
-        Toast.makeText(this, event.getMessage(), Toast.LENGTH_SHORT).show();
+        Log.e(TAG, event.getMessage());
     }
 
     @Subscribe
@@ -177,6 +215,7 @@ public class CreateConfActivity extends AppCompatActivity {
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override
             public void run() {
+                Log.e(TAG, event.getConferenceUser().getUserId());
                 adapter.addParticipant(event.getConferenceUser());
                 adapter.notifyDataSetChanged();
             }
