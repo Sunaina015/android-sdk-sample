@@ -124,6 +124,39 @@ VoxeetSdk.sendBroadcastMessage(String message);
 VoxeetSdk.getConferenceUsers();
 ```
 
+### Getting microphone state
+
+```java
+// Get current conference users
+VoxeetSdk.isMuted();
+```
+
+### Muting microphone
+
+```java
+// Get current conference users
+VoxeetSdk.muteConference(boolean mute);
+```
+
+### Getting available audio routes
+
+```java
+// Get available audio routes
+VoxeetSdk.getAvailableRoutes();
+```
+
+### Getting current audio route
+
+```java
+VoxeetSdk.currentRoute();
+```
+
+### Setting audio route
+
+```java
+VoxeetSdk.setAudioRoute(AudioRoute route);
+```
+
 ### Registering the SDK
 
 ```java
