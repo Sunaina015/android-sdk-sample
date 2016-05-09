@@ -6,7 +6,6 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
 
     <application
@@ -30,6 +29,5 @@
             android:name=".activities.CreateConfActivity"
             android:label="@string/create_conf">
         </activity>
-        <meta-data android:name="app_id" android:value="mykey123" />
     </application>
 </manifest>

@@ -38,6 +38,9 @@ Add the following permissions to your Android Manifest file:
   <uses-permission android:name="android.permission.WAKE_LOCK" />
   <uses-permission android:name="android.permission.BLUETOOTH" />
   <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+  // Used to change audio routes
+  <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
 ```
 
 In order to target Android API level 23 or later, you will need to ensure that your application requests runtime permissions for microphone access. To do this, perform the following step:
@@ -93,6 +96,12 @@ VoxeetSdk.joinConference(String conferenceId);
 
 ```java
 VoxeetSdk.leaveConference();
+```
+
+### Checking if a conference is live  
+
+```java
+VoxeetSdk.isConferenceLive();
 ```
 
 ### Changing user position  
@@ -185,7 +194,7 @@ public void onCreate() {
 
 ## Activity Structure
 
-In order to work properly, it is necessary to register and unresgister the SDK respectively in the onCreate() and onDestroy() methods of your activity/fragment holding the conference.
+In order to work properly, it is necessary to register and unregister the SDK respectively in the onCreate() and onDestroy() methods of your activity/fragment holding the conference.
 
 ```java
 @Override
@@ -265,8 +274,12 @@ public void onEvent(MessageReceived event) {
 }
 ```
 
+## Best practice regarding conferences
+
+Only one instance of a conference is allowed to be live. Leaving the current conference before creating or joining another one is mandatory. Otherwise, a IllegalStateException will be thrown.
+
 ## Version
-0.8.42
+0.8.44
 
 ## Tech
 
