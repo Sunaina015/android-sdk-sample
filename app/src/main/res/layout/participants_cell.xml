@@ -10,19 +10,26 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
+        android:gravity="center"
         android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:id="@+id/avatar"/>
 
         <TextView
             android:id="@+id/position"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:layout_marginLeft="10dp"
             android:textColor="@color/white" />
 
         <TextView
             android:id="@+id/device"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginLeft="10dp"
             android:textColor="@color/white" />
@@ -30,7 +37,7 @@
         <TextView
             android:id="@+id/user_id"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:singleLine="true"
             android:layout_marginLeft="10dp"
@@ -75,7 +82,7 @@
         <SeekBar
             android:id="@+id/angle"
             android:layout_width="0dp"
-            android:layout_height="30dp"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:progress="100"
             android:max="200" />
@@ -83,7 +90,7 @@
         <SeekBar
             android:id="@+id/distance"
             android:layout_width="0dp"
-            android:layout_height="30dp"
+            android:layout_height="match_parent"
             android:progress="50"
             android:layout_weight="1"
             android:max="100" />

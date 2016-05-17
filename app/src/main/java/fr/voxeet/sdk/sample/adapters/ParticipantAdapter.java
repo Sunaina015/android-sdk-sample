@@ -1,16 +1,17 @@
 package fr.voxeet.sdk.sample.adapters;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,11 +19,12 @@ import java.util.List;
 import java.util.Map;
 
 import fr.voxeet.sdk.sample.R;
-import voxeet.com.sdk.models.ConferenceUser;
 import voxeet.com.sdk.core.VoxeetSdk;
+import voxeet.com.sdk.json.UserInfo;
+import voxeet.com.sdk.models.ConferenceUser;
 
 /**
- * Created by RomainBenmansour on 4/21/16.
+ * Created by RomainB on 4/21/16.
  */
 public class ParticipantAdapter extends BaseAdapter {
 
@@ -57,7 +59,6 @@ public class ParticipantAdapter extends BaseAdapter {
     }
 
     public void updateParticipant(ConferenceUser conferenceUser) {
-
         if (conferenceUser.getStatus().equalsIgnoreCase(ConferenceUser.LEFT)) {
             ConferenceUser user = doesContain(conferenceUser);
             if (user != null) {
@@ -79,7 +80,6 @@ public class ParticipantAdapter extends BaseAdapter {
     }
 
     public void addParticipant(ConferenceUser conferenceUser) {
-
         if (doesContain(conferenceUser) == null) {
             participants.add(conferenceUser);
             positionMap.put(conferenceUser.getUserId(), new RoomPosition(0, 0.5));
@@ -115,6 +115,7 @@ public class ParticipantAdapter extends BaseAdapter {
             holder.position = (TextView) convertView.findViewById(R.id.position);
             holder.angle = (SeekBar) convertView.findViewById(R.id.angle);
             holder.distance = (SeekBar) convertView.findViewById(R.id.distance);
+            holder.avatar = (ImageView) convertView.findViewById(R.id.avatar);
 
             convertView.setTag(holder);
         } else {
@@ -127,11 +128,21 @@ public class ParticipantAdapter extends BaseAdapter {
 
         holder.position.setText(context.getResources().getString(R.string.participant_number, (position + 1)));
 
-        holder.userId.setText(user.getUserId());
+        UserInfo info = user.getUserInfo();
+        if (info != null && info.getAvatarUrl() != null && info.getAvatarUrl().length() > 0) {
+            holder.avatar.setVisibility(View.VISIBLE);
+            Picasso.with(context).load(info.getAvatarUrl()).into(holder.avatar);
+        } else
+            holder.avatar.setVisibility(View.INVISIBLE);
+
+        if (info != null && info.getName() != null && info.getName().length() > 0)
+            holder.userId.setText(info.getName());
+        else
+            holder.userId.setText(user.getUserId());
 
         holder.angle.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            public void onProgressChanged(SeekBar seekBar, final int progress, boolean fromUser) {
                 updatePosition(user.getUserId(), progress, holder.distance.getProgress());
             }
 
@@ -148,7 +159,7 @@ public class ParticipantAdapter extends BaseAdapter {
 
         holder.distance.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            public void onProgressChanged(SeekBar seekBar, final int progress, boolean fromUser) {
                 updatePosition(user.getUserId(), holder.angle.getProgress(), progress);
             }
 
@@ -168,8 +179,10 @@ public class ParticipantAdapter extends BaseAdapter {
 
     private void updatePosition(String userId, int x, int y) {
 
+        // angle has to be between -1 and 1
         double angle = ((double)x / 100.0) - 1.0;
 
+        // distance has to be between 0 and 1
         double distance = (double)y / 100.0;
 
         positionMap.put(userId, new RoomPosition(angle, distance));
@@ -187,5 +200,6 @@ public class ParticipantAdapter extends BaseAdapter {
         TextView position;
         SeekBar angle;
         SeekBar distance;
+        ImageView avatar;
     }
 }

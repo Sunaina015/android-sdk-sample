@@ -24,5 +24,6 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:23.3.0'
     compile 'com.android.support:design:23.3.0'
-    compile 'com.voxeet.sdk:core:0.8.45'
+    compile 'com.voxeet.sdk:core:0.8.47'
+    compile 'com.squareup.picasso:picasso:2.5.2'
 }
