@@ -33,7 +33,7 @@ bintray {
     pkg {
         repo = bintrayRepo
         name = bintrayName
-        useOrg = org
+        useOrg = 'voxeet'
         desc = libraryDescription
         publish = true
         publicDownloadNumbers = true
