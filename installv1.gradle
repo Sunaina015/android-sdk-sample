@@ -1,49 +1,34 @@
-apply plugin: 'com.jfrog.bintray'
+apply plugin: 'com.github.dcendents.android-maven'
 
-version = libraryVersion
+group = publishedGroupId                               // Maven Group ID for the artifact
 
-task sourcesJar(type: Jar) {
-    from android.sourceSets.main.java.srcDirs
-    classifier = 'sources'
-}
+install {
+    repositories.mavenInstaller {
+        // This generates POM.xml with proper parameters
+        pom {
+            project {
+                packaging 'aar'
+                groupId publishedGroupId
+                artifactId artifact
 
-task javadoc(type: Javadoc) {
-    source = android.sourceSets.main.java.srcDirs
-    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-}
+                // Add your description here
+                name libraryName
+                description libraryDescription
 
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
-    from javadoc.destinationDir
-}
-artifacts {
-    archives javadocJar
-    archives sourcesJar
-}
+                developers {
+                    developer {
+                        id developerId
+                        name developerName
+                        email developerEmail
+                    }
+                }
+                scm {
+                    //connection gitUrl
+                    //developerConnection gitUrl
+                    //url siteUrl
 
-// Bintray
-Properties properties = new Properties()
-properties.load(project.rootProject.file('local.properties').newDataInputStream())
-
-bintray {
-    user = properties.getProperty("bintray.user")
-    key = properties.getProperty("bintray.apikey")
-
-    configurations = ['archives']
-    pkg {
-        repo = bintrayRepo
-        name = bintrayName
-        desc = libraryDescription
-        publish = true
-        userOrg = org
-        publicDownloadNumbers = true
-        version {
-            desc = libraryDescription
-            // Optional. The passphrase for GPG signing'
-            // gpg {
-            //    sign = true //Determines whether to GPG sign the files. The default is false
-            //    passphrase = properties.getProperty("bintray.gpg.password")
-            //}
+                }
+            }
         }
     }
 }
