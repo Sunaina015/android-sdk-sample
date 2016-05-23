@@ -228,7 +228,7 @@ protected void onDestroy() {
 
 ## ConferenceUser Model
 
-ConferenceUser model now has a userInfo object where infos are stored such as the external user id, the url avatar and display name. it also contains the angle and distance related to each user in the userPosition attribute.
+ConferenceUser model now has an userInfo object where infos are stored such as the external user id, the url avatar and display name. it also contains the angle and distance related to each user in the userPosition attribute.
 
 ```java
 public UserInfo getUserInfo();
