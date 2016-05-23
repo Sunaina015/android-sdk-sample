@@ -6,14 +6,17 @@ The SDK is a Java library allowing users to:
   - Join conferences
   - Change sounds angle and direction for each conference user
   - Broadcast messages to other participants
+  - Mute users/conferences
+  - If you use External login like O365, LDAP, or custom login to retrieve contact details, it is now possible to also add your contact    ID with the display name and the photo urrl avatar.
+    This allows you to ask guest users to introduce themselves and provide their display name and for your authenticated users in your enterprise or for your clients the ID that can be retrieved from O365 (name, department, etc).
 
 ### Installing the Android SDK using Gradle
 
-To install the SDK directly into your Android project using the Grade build system and an IDE like Android Studio, add the following entry: "compile 'com.voxeet.sdk:core:0.8.45'" to your build.gradle file as shown below:
+To install the SDK directly into your Android project using the Grade build system and an IDE like Android Studio, add the following entry: "compile 'com.voxeet.sdk:core:0.8.50'" to your build.gradle file as shown below:
 
 ```java
 dependencies {
-    compile 'com.voxeet.sdk:core:0.8.45'
+    compile 'com.voxeet.sdk:core:0.8.50'
 }
 ```
 ### Recommended settings for API compatibility:
@@ -101,7 +104,7 @@ VoxeetSdk.leaveConference();
 ### Checking if a conference is live  
 
 ```java
-VoxeetSdk.isConferenceLive();
+VoxeetSdk.isLive();
 ```
 
 ### Changing user position  
@@ -145,6 +148,19 @@ VoxeetSdk.isMuted();
 ```java
 // Get current conference users
 VoxeetSdk.muteConference(boolean mute);
+```
+
+### Muting user
+
+```java
+// Muting or unmmuting an user depending on the boolean value
+VoxeetSdk.muteUSer(String userId, boolean mute);
+```
+
+### Checking if a user is muted
+
+```java
+VoxeetSdk.isUserMuted(String userId);
 ```
 
 ### Getting available audio routes
@@ -208,6 +224,18 @@ protected void onDestroy() {
     super.onDestroy();
     VoxeetSdk.unregister(this);  
 }   
+```
+
+## ConferenceUser Model
+
+ConferenceUser model now has a userInfo object where infos are stored such as the external user id, the url avatar and display name. it also contains the angle and distance related to each user in the userPosition attribute.
+
+```java
+public UserInfo getUserInfo();
+```
+
+```java
+public Position getUserPosition();
 ```
 
 ## Events
