@@ -24,7 +24,6 @@ import voxeet.com.sdk.core.VoxeetSdk;
  * Created by Thomas on 08/12/2015.
  */
 public class ConferenceOutput extends DialogFragment {
-
     public static final String TAG = ConferenceOutput.class.getSimpleName();
 
     protected ListView outputListView;
@@ -35,10 +34,12 @@ public class ConferenceOutput extends DialogFragment {
 
     private Context context;
 
+    public ConferenceOutput() {
+    }
+
     public ConferenceOutput(Context context) {
         this.context = context;
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -56,14 +57,15 @@ public class ConferenceOutput extends DialogFragment {
         outputListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                VoxeetSdk.setOutputRoute(currentRoutes.get(position));
+                VoxeetSdk.setSdkoutputRoute(currentRoutes.get(position));
+
                 dismiss();
             }
         });
     }
 
     protected void setRoutesFromAudioSession() {
-        currentRoutes = VoxeetSdk.getAvailableRoutes();
+        currentRoutes = VoxeetSdk.getSdkAvailableRoutes();
 
         List<String> desc = new ArrayList<>();
         for (Media.AudioRoute r : currentRoutes) {
@@ -72,7 +74,7 @@ public class ConferenceOutput extends DialogFragment {
 
         outputListView.setAdapter(new ArrayAdapter<>(context, android.R.layout.simple_list_item_single_choice, desc.toArray(new String[desc.size()])));
 
-        Media.AudioRoute selectedRoute = VoxeetSdk.currentRoute();
+        Media.AudioRoute selectedRoute = VoxeetSdk.currentSdkRoute();
 
         outputListView.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
         outputListView.setItemChecked(currentRoutes.indexOf(selectedRoute), true);

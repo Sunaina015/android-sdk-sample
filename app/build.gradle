@@ -9,7 +9,7 @@ android {
         minSdkVersion 16
         targetSdkVersion 23
         versionCode 1
-        versionName "1.0"
+        versionName "1.1"
     }
     buildTypes {
         release {
@@ -24,6 +24,6 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:23.3.0'
     compile 'com.android.support:design:23.3.0'
-    compile 'com.voxeet.sdk:core:0.8.47'
+    compile 'com.voxeet.sdk:core:0.5.745'
     compile 'com.squareup.picasso:picasso:2.5.2'
 }

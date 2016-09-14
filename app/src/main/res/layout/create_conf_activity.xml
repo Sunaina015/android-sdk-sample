@@ -69,7 +69,7 @@
         <Button
             android:id="@+id/send_broadcast"
             android:layout_width="0dp"
-            android:layout_height="50dp"
+            android:layout_height="40dp"
             android:layout_gravity="center"
             android:layout_weight="1"
             android:background="@color/colorAccent"
@@ -124,11 +124,23 @@
 
     </LinearLayout>
 
-
-    <ListView
-        android:id="@+id/participants"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="10dp" />
+        android:layout_height="match_parent">
+
+        <ListView
+            android:id="@+id/participants"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="10dp" />
+
+        <fr.voxeet.sdk.sample.ScreenShareView
+            android:layout_width="@dimen/screen_preview_width"
+            android:layout_height="@dimen/screen_preview_height"
+            android:layout_gravity="center"
+            android:visibility="gone"
+            android:id="@+id/screen_share"/>
+
+    </FrameLayout>
 
 </LinearLayout>

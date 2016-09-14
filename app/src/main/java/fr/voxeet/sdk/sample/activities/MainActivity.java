@@ -1,25 +1,24 @@
 package fr.voxeet.sdk.sample.activities;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import fr.voxeet.sdk.sample.R;
 
 public class MainActivity extends AppCompatActivity {
-
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private static final int RECORD_AUDIO_RESULT = 0x20;
+    private static final int REQUEST_EXTERNAL_STORAGE = 0x21;
 
     private static final int JOIN = 0x1000;
     private static final int CREATE = 0x1010;
@@ -32,6 +31,11 @@ public class MainActivity extends AppCompatActivity {
     private Button createConf;
 
     private Button joinConf;
+
+    private static String[] PERMISSIONS_STORAGE = {
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+    };
 
     @Override
     public void onRequestPermissionsResult(int requestCode,
@@ -55,6 +59,15 @@ public class MainActivity extends AppCompatActivity {
                         default:
                             throw new IllegalStateException("Invalid last option");
                     }
+                }
+                return;
+            }
+            case REQUEST_EXTERNAL_STORAGE: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    Toast.makeText(this, "Storage granted", Toast.LENGTH_SHORT).show();
                 }
                 return;
             }
@@ -94,10 +107,25 @@ public class MainActivity extends AppCompatActivity {
                 joinCall();
             }
         });
+
+        verifyStoragePermissions(this);
+    }
+
+    public void verifyStoragePermissions(Activity context) {
+        // Check if we have write permission
+        int permission = ActivityCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            // We don't have permission so prompt the user
+            ActivityCompat.requestPermissions(
+                    context,
+                    PERMISSIONS_STORAGE,
+                    REQUEST_EXTERNAL_STORAGE
+            );
+        }
     }
 
     private void startDemoCall() {
-
         lastAction = DEMO;
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED)
@@ -110,7 +138,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void joinCall() {
-
         lastAction = JOIN;
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED)
@@ -123,7 +150,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void createConf() {
-
         lastAction = CREATE;
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED)

@@ -8,6 +8,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
@@ -21,7 +22,8 @@ import java.util.Map;
 import fr.voxeet.sdk.sample.R;
 import voxeet.com.sdk.core.VoxeetSdk;
 import voxeet.com.sdk.json.UserInfo;
-import voxeet.com.sdk.models.ConferenceUser;
+import voxeet.com.sdk.models.abs.ConferenceUser;
+import voxeet.com.sdk.models.impl.DefaultConferenceUser;
 
 /**
  * Created by RomainB on 4/21/16.
@@ -59,10 +61,11 @@ public class ParticipantAdapter extends BaseAdapter {
     }
 
     public void updateParticipant(ConferenceUser conferenceUser) {
-        if (conferenceUser.getStatus().equalsIgnoreCase(ConferenceUser.LEFT)) {
+        if (conferenceUser.getStatus().equalsIgnoreCase(DefaultConferenceUser.LEFT)) {
             ConferenceUser user = doesContain(conferenceUser);
             if (user != null) {
                 positionMap.remove(conferenceUser.getUserId());
+
                 participants.remove(user);
             }
         }
@@ -82,6 +85,7 @@ public class ParticipantAdapter extends BaseAdapter {
     public void addParticipant(ConferenceUser conferenceUser) {
         if (doesContain(conferenceUser) == null) {
             participants.add(conferenceUser);
+
             positionMap.put(conferenceUser.getUserId(), new RoomPosition(0, 0.5));
         }
     }
@@ -122,7 +126,7 @@ public class ParticipantAdapter extends BaseAdapter {
             holder = (ViewHolder)convertView.getTag();
         }
 
-        final ConferenceUser user = (ConferenceUser) getItem(position);
+        final DefaultConferenceUser user = (DefaultConferenceUser) getItem(position);
 
         holder.device.setText(user.getDeviceType());
 
@@ -131,14 +135,23 @@ public class ParticipantAdapter extends BaseAdapter {
         UserInfo info = user.getUserInfo();
         if (info != null && info.getAvatarUrl() != null && info.getAvatarUrl().length() > 0) {
             holder.avatar.setVisibility(View.VISIBLE);
+
             Picasso.with(context).load(info.getAvatarUrl()).into(holder.avatar);
-        } else
-            holder.avatar.setVisibility(View.INVISIBLE);
+        }
 
         if (info != null && info.getName() != null && info.getName().length() > 0)
             holder.userId.setText(info.getName());
         else
             holder.userId.setText(user.getUserId());
+
+        holder.avatar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                VoxeetSdk.muteSdkUser(user.getUserId(), !user.isMuted());
+
+                Toast.makeText(context, "Mute set to: " + user.isMuted(), Toast.LENGTH_SHORT).show();
+            }
+        });
 
         holder.angle.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override

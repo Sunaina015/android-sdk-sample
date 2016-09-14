@@ -12,17 +12,21 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.voxeet.android.media.Media;
+import com.voxeet.android.media.MediaStream;
+
 import org.greenrobot.eventbus.Subscribe;
 
 import fr.voxeet.sdk.sample.R;
+import fr.voxeet.sdk.sample.ScreenShareView;
 import fr.voxeet.sdk.sample.adapters.ParticipantAdapter;
 import fr.voxeet.sdk.sample.dialogs.ConferenceOutput;
-import voxeet.com.sdk.events.success.ConferenceLeft;
-import voxeet.com.sdk.events.success.MessageReceived;
-import voxeet.com.sdk.events.success.ConferenceJoined;
-import voxeet.com.sdk.events.success.ParticipantAdded;
-import voxeet.com.sdk.events.success.ParticipantUpdated;
 import voxeet.com.sdk.core.VoxeetSdk;
+import voxeet.com.sdk.events.success.ConferenceJoinedSuccessEvent;
+import voxeet.com.sdk.events.success.ConferenceLeftSuccessEvent;
+import voxeet.com.sdk.events.success.ConferenceUserJoinedEvent;
+import voxeet.com.sdk.events.success.ConferenceUserUpdateEvent;
+import voxeet.com.sdk.events.success.MessageReceived;
 
 /**
  * Created by RomainBenmansour on 4/21/16.
@@ -61,6 +65,59 @@ public class CreateConfActivity extends AppCompatActivity {
 
     private ConferenceOutput conferenceOutput = null;
 
+    private ScreenShareView screenShare;
+
+    private Media.MediaStreamListener mediaStreamListener = new Media.MediaStreamListener() {
+
+        @Override
+        public void onStreamAdded(String peer, MediaStream stream) {
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    screenShare.setVisibility(View.VISIBLE);
+                }
+            });
+
+            VoxeetSdk.attachMediaSdkStream(peer, stream, screenShare.getRenderer());
+        }
+
+        @Override
+        public void onStreamRemoved(String peer, MediaStream stream) {
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    screenShare.setVisibility(View.GONE);
+                }
+            });
+
+            VoxeetSdk.unAttachSdkMediaStream(peer, stream, screenShare.getRenderer());
+        }
+
+        @Override
+        public void onScreenStreamAdded(final String peer, final MediaStream stream) {
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    screenShare.setVisibility(View.VISIBLE);
+                }
+            });
+
+            VoxeetSdk.attachMediaSdkStream(peer, stream, screenShare.getRenderer());
+        }
+
+        @Override
+        public void onScreenStreamRemoved(String peer, MediaStream stream) {
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    screenShare.setVisibility(View.GONE);
+                }
+            });
+
+            VoxeetSdk.unAttachSdkMediaStream(peer, stream, screenShare.getRenderer());
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,6 +125,8 @@ public class CreateConfActivity extends AppCompatActivity {
         setContentView(R.layout.create_conf_activity);
 
         this.adapter = new ParticipantAdapter(this);
+
+        this.screenShare = (ScreenShareView) findViewById(R.id.screen_share);
 
         this.joinLayout = (ViewGroup) findViewById(R.id.join_conf_layout);
 
@@ -79,7 +138,7 @@ public class CreateConfActivity extends AppCompatActivity {
         this.join.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                VoxeetSdk.joinConference(editextConference.getText().toString());
+                VoxeetSdk.joinSdkConference(editextConference.getText().toString());
 
                 leave.setVisibility(View.VISIBLE);
             }
@@ -96,7 +155,7 @@ public class CreateConfActivity extends AppCompatActivity {
         this.sendBroadcast.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                VoxeetSdk.sendBroadcast(broadcastConference.getText().toString());
+                VoxeetSdk.sendSdkBroadcast(broadcastConference.getText().toString());
             }
         });
 
@@ -104,7 +163,7 @@ public class CreateConfActivity extends AppCompatActivity {
         this.leave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                VoxeetSdk.leaveConference();
+                VoxeetSdk.leaveSdkConference();
             }
         });
 
@@ -126,15 +185,14 @@ public class CreateConfActivity extends AppCompatActivity {
         this.mute.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                boolean muted = !VoxeetSdk.isMuted();
+                boolean muted = !VoxeetSdk.isSdkMuted();
 
                 if (muted)
                     mute.setText("Muted");
                 else
                     mute.setText("Not Muted");
 
-                VoxeetSdk.muteConference(muted);
+                VoxeetSdk.muteSdkConference(muted);
             }
         });
 
@@ -147,10 +205,10 @@ public class CreateConfActivity extends AppCompatActivity {
         else {
             if (getIntent().hasExtra("demo") && getIntent().getBooleanExtra("demo", false)) {
                 isDemo = true;
-                VoxeetSdk.createDemoConference();
+                VoxeetSdk.createSdkDemo();
             } else {
                 isDemo = false;
-                VoxeetSdk.createConference();
+                VoxeetSdk.createSdkConference();
             }
         }
 
@@ -169,10 +227,11 @@ public class CreateConfActivity extends AppCompatActivity {
     }
 
     @Subscribe
-    public void onEvent(final ConferenceJoined event) {
+    public void onEvent(final ConferenceJoinedSuccessEvent event) {
         handler.post(new Runnable() {
             @Override
             public void run() {
+                VoxeetSdk.setMediaSdkStreamListener(mediaStreamListener);
 
                 if (!isDemo) {
                     aliasId.setVisibility(View.VISIBLE);
@@ -185,16 +244,16 @@ public class CreateConfActivity extends AppCompatActivity {
     }
 
     @Subscribe
-    public void onEvent(final ConferenceLeft event) {
+    public void onEvent(final ConferenceLeftSuccessEvent event) {
         finish();
     }
 
     @Subscribe
-    public void onEvent(final ParticipantUpdated event) {
+    public void onEvent(final ConferenceUserUpdateEvent event) {
         handler.post(new Runnable() {
             @Override
             public void run() {
-                adapter.updateParticipant(event.getConferenceUser());
+                adapter.updateParticipant(event.getUser());
                 adapter.notifyDataSetChanged();
             }
         });
@@ -202,21 +261,15 @@ public class CreateConfActivity extends AppCompatActivity {
 
     @Subscribe
     public void onEvent(MessageReceived event) {
-
-        ParticipantAdapter.RoomPosition position = adapter.getUserPosition(event.getUserId());
-
-        VoxeetSdk.playSound("elephant_mono.mp3", position.angle, position.distance);
-
         Log.e(TAG, event.getMessage());
     }
 
     @Subscribe
-    public void onEvent(final ParticipantAdded event) {
+    public void onEvent(final ConferenceUserJoinedEvent event) {
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override
             public void run() {
-                Log.e(TAG, event.getConferenceUser().getUserId());
-                adapter.addParticipant(event.getConferenceUser());
+                adapter.addParticipant(event.getUser());
                 adapter.notifyDataSetChanged();
             }
         });
