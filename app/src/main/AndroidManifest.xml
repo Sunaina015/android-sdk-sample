@@ -3,6 +3,7 @@
     package="fr.voxeet.sdk.sample">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
@@ -15,6 +16,15 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
+        <meta-data
+            android:name="voxeet"
+            android:value="false" />
+
+        <meta-data
+            android:name="prod"
+            android:value="true" />
+
         <activity
             android:name=".activities.MainActivity"
             android:label="@string/app_name"
