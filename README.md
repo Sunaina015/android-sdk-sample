@@ -116,13 +116,6 @@ VoxeetSdk.isSdkConferenceLive();
 VoxeetSdk.changePeerPosition(String userId, double x, double y);
 ```
 
-### Playing a sound
-
-```java
-// Sound has to be placed in the asset folder
-VoxeetSdk.playSound(String path, double angle, double distance);
-```
-
 ### Sending message in a conference
 
 ```java
