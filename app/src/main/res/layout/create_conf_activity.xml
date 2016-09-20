@@ -7,6 +7,76 @@
     android:padding="10dp">
 
     <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_marginTop="10dp"
+        android:id="@+id/conference_options"
+        android:visibility="gone"
+        android:layout_height="40dp">
+
+        <Button
+            android:id="@+id/leaveConf"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:background="@color/colorAccent"
+            android:text="Leave"
+            android:layout_margin="1dp"
+            android:textColor="@color/white"
+            android:visibility="visible" />
+
+        <Button
+            android:id="@+id/audio_routes"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_margin="1dp"
+            android:layout_gravity="center"
+            android:background="@color/colorAccent"
+            android:text="audio"
+            android:textColor="@android:color/white"
+            android:visibility="visible" />
+
+        <Button
+            android:id="@+id/mute"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_margin="1dp"
+            android:layout_gravity="center"
+            android:background="@color/colorAccent"
+            android:text="mute"
+            android:textColor="@android:color/white"
+            android:visibility="visible" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <fr.voxeet.sdk.sample.ScreenShareView
+            android:layout_width="@dimen/screen_preview_width"
+            android:layout_height="@dimen/screen_preview_height"
+            android:layout_gravity="center"
+            android:padding="5dp"
+            android:visibility="gone"
+            android:layout_weight="1"
+            android:id="@+id/screen_share"/>
+
+        <fr.voxeet.sdk.sample.ScreenShareView
+            android:layout_width="@dimen/screen_preview_width"
+            android:layout_height="@dimen/screen_preview_height"
+            android:layout_gravity="center"
+            android:padding="5dp"
+            android:layout_weight="1"
+            android:visibility="gone"
+            android:id="@+id/video_stream"/>
+
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/join_conf_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -79,51 +149,6 @@
 
     </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_marginTop="10dp"
-        android:id="@+id/conference_options"
-        android:visibility="gone"
-        android:layout_height="40dp">
-
-        <Button
-            android:id="@+id/leaveConf"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:layout_weight="1"
-            android:background="@color/colorAccent"
-            android:text="Leave"
-            android:layout_margin="1dp"
-            android:textColor="@color/white"
-            android:visibility="visible" />
-
-        <Button
-            android:id="@+id/audio_routes"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:layout_margin="1dp"
-            android:layout_gravity="center"
-            android:background="@color/colorAccent"
-            android:text="audio"
-            android:textColor="@android:color/white"
-            android:visibility="visible" />
-
-        <Button
-            android:id="@+id/mute"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:layout_margin="1dp"
-            android:layout_gravity="center"
-            android:background="@color/colorAccent"
-            android:text="mute"
-            android:textColor="@android:color/white"
-            android:visibility="visible" />
-
-    </LinearLayout>
-
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -133,13 +158,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginTop="10dp" />
-
-        <fr.voxeet.sdk.sample.ScreenShareView
-            android:layout_width="@dimen/screen_preview_width"
-            android:layout_height="@dimen/screen_preview_height"
-            android:layout_gravity="center"
-            android:visibility="gone"
-            android:id="@+id/screen_share"/>
 
     </FrameLayout>
 

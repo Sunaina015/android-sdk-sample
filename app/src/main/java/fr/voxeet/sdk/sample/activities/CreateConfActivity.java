@@ -1,8 +1,12 @@
 package fr.voxeet.sdk.sample.activities;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -11,22 +15,29 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.voxeet.android.media.Media;
 import com.voxeet.android.media.MediaStream;
+import com.voxeet.android.media.video.CameraEnumerationAndroid;
+import com.voxeet.android.media.video.VideoCapturerAndroid;
 
+import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import fr.voxeet.sdk.sample.R;
 import fr.voxeet.sdk.sample.ScreenShareView;
 import fr.voxeet.sdk.sample.adapters.ParticipantAdapter;
 import fr.voxeet.sdk.sample.dialogs.ConferenceOutput;
+import voxeet.com.sdk.core.VoxeetPreferences;
 import voxeet.com.sdk.core.VoxeetSdk;
 import voxeet.com.sdk.events.success.ConferenceJoinedSuccessEvent;
 import voxeet.com.sdk.events.success.ConferenceLeftSuccessEvent;
 import voxeet.com.sdk.events.success.ConferenceUserJoinedEvent;
 import voxeet.com.sdk.events.success.ConferenceUserUpdateEvent;
 import voxeet.com.sdk.events.success.MessageReceived;
+import voxeet.com.sdk.events.success.VideoStreamAddedEvent;
+import voxeet.com.sdk.models.abs.ConferenceUser;
 
 /**
  * Created by RomainBenmansour on 4/21/16.
@@ -34,6 +45,8 @@ import voxeet.com.sdk.events.success.MessageReceived;
 public class CreateConfActivity extends AppCompatActivity {
 
     private static final String TAG = CreateConfActivity.class.getSimpleName();
+
+    private static final int CAMERA_REQUEST = 0x0010;
 
     private Button leave;
 
@@ -67,30 +80,37 @@ public class CreateConfActivity extends AppCompatActivity {
 
     private ScreenShareView screenShare;
 
+    private ScreenShareView videoStream;
+
+    private VideoCapturerAndroid capturer;
+
     private Media.MediaStreamListener mediaStreamListener = new Media.MediaStreamListener() {
 
         @Override
         public void onStreamAdded(String peer, MediaStream stream) {
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    screenShare.setVisibility(View.VISIBLE);
-                }
-            });
-
-            VoxeetSdk.attachMediaSdkStream(peer, stream, screenShare.getRenderer());
+            if (VoxeetPreferences.id() != null && VoxeetPreferences.id().equals(peer)) { // Own video stream
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        videoStream.setVisibility(View.VISIBLE);
+                    }
+                });
+                VoxeetSdk.attachMediaSdkStream(peer, stream, videoStream.getRenderer());
+            } else { // Participant video steam
+                EventBus.getDefault().post(new VideoStreamAddedEvent(peer, stream));
+            }
         }
 
         @Override
-        public void onStreamRemoved(String peer, MediaStream stream) {
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    screenShare.setVisibility(View.GONE);
-                }
-            });
-
-            VoxeetSdk.unAttachSdkMediaStream(peer, stream, screenShare.getRenderer());
+        public void onStreamRemoved(String peer) {
+            if (VoxeetPreferences.id().equals(peer)) {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        videoStream.setVisibility(View.GONE);
+                    }
+                });
+            }
         }
 
         @Override
@@ -106,15 +126,13 @@ public class CreateConfActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onScreenStreamRemoved(String peer, MediaStream stream) {
+        public void onScreenStreamRemoved(String peer) {
             handler.post(new Runnable() {
                 @Override
                 public void run() {
                     screenShare.setVisibility(View.GONE);
                 }
             });
-
-            VoxeetSdk.unAttachSdkMediaStream(peer, stream, screenShare.getRenderer());
         }
     };
 
@@ -128,11 +146,17 @@ public class CreateConfActivity extends AppCompatActivity {
 
         this.screenShare = (ScreenShareView) findViewById(R.id.screen_share);
 
+        this.videoStream = (ScreenShareView) findViewById(R.id.video_stream);
+
         this.joinLayout = (ViewGroup) findViewById(R.id.join_conf_layout);
 
         this.aliasId = (TextView) findViewById(R.id.conference_alias);
 
         this.conferenceOptions = (ViewGroup) findViewById(R.id.conference_options);
+
+        this.capturer = VideoCapturerAndroid.create(CameraEnumerationAndroid.getNameOfFrontFacingDevice(), null);
+
+        VoxeetSdk.setSdkVideoCapturer(capturer);
 
         this.join = (Button) findViewById(R.id.join);
         this.join.setOnClickListener(new View.OnClickListener() {
@@ -186,7 +210,6 @@ public class CreateConfActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 boolean muted = !VoxeetSdk.isSdkMuted();
-
                 if (muted)
                     mute.setText("Muted");
                 else
@@ -200,6 +223,29 @@ public class CreateConfActivity extends AppCompatActivity {
 
         this.handler = new Handler(Looper.getMainLooper());
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.CAMERA}, CAMERA_REQUEST);
+        } else
+            initConf();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == CAMERA_REQUEST) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                initConf();
+            else {
+                Toast.makeText(this, "Camera permission required", Toast.LENGTH_SHORT).show();
+
+                finish();
+            }
+        }
+    }
+
+    private void initConf() {
         if (getIntent().hasExtra("joinConf") && getIntent().getBooleanExtra("joinConf", false))
             displayJoin();
         else {
@@ -231,16 +277,18 @@ public class CreateConfActivity extends AppCompatActivity {
         handler.post(new Runnable() {
             @Override
             public void run() {
-                VoxeetSdk.setMediaSdkStreamListener(mediaStreamListener);
+                joinLayout.setVisibility(View.GONE);
+
+                conferenceOptions.setVisibility(View.VISIBLE);
 
                 if (!isDemo) {
                     aliasId.setVisibility(View.VISIBLE);
                     aliasId.setText(event.getAliasId());
                 }
-
-                conferenceOptions.setVisibility(View.VISIBLE);
             }
         });
+
+        VoxeetSdk.setMediaSdkStreamListener(mediaStreamListener);
     }
 
     @Subscribe
@@ -253,8 +301,13 @@ public class CreateConfActivity extends AppCompatActivity {
         handler.post(new Runnable() {
             @Override
             public void run() {
-                adapter.updateParticipant(event.getUser());
-                adapter.notifyDataSetChanged();
+                if (event.getUser().getStatus().equals(ConferenceUser.Status.LEFT.name())) {
+                    adapter.updateParticipant(event.getUser());
+                    adapter.notifyDataSetChanged();
+                } else if (event.getUser().getStatus().equals(ConferenceUser.Status.ON_AIR.name())) {
+                    adapter.addParticipant(event.getUser());
+                    adapter.notifyDataSetChanged();
+                }
             }
         });
     }
@@ -266,10 +319,11 @@ public class CreateConfActivity extends AppCompatActivity {
 
     @Subscribe
     public void onEvent(final ConferenceUserJoinedEvent event) {
-        new Handler(Looper.getMainLooper()).post(new Runnable() {
+        runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 adapter.addParticipant(event.getUser());
+
                 adapter.notifyDataSetChanged();
             }
         });
