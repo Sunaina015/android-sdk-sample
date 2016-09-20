@@ -12,11 +12,11 @@ The SDK is a Java library allowing users to:
 
 ### Installing the Android SDK using Gradle
 
-To install the SDK directly into your Android project using the Grade build system and an IDE like Android Studio, add the following entry: "compile 'com.voxeet.sdk:core:0.8.50'" to your build.gradle file as shown below:
+To install the SDK directly into your Android project using the Grade build system and an IDE like Android Studio, add the following entry: "compile 'com.voxeet.sdk:core:0.7.750'" to your build.gradle file as shown below:
 
 ```java
 dependencies {
-    compile 'com.voxeet.sdk:core:0.8.50'
+    compile 'com.voxeet.sdk:core:0.7.750'
 }
 ```
 ### Recommended settings for API compatibility:
@@ -38,6 +38,7 @@ Add the following permissions to your Android Manifest file:
 
 ```java
   <uses-permission android:name="android.permission.INTERNET" />
+  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
   <uses-permission android:name="android.permission.WAKE_LOCK" />
   <uses-permission android:name="android.permission.BLUETOOTH" />
   <uses-permission android:name="android.permission.RECORD_AUDIO" />
@@ -73,7 +74,7 @@ Add your consumer key & secret to the xml string file of your application.
 
 ```java
 // To be called from the application class
-VoxeetSdk.sdkInitialize(Context context, String consumerKey, String consumerSecret);
+VoxeetSdk.sdkInitialize(Context context, String consumerKey, String consumerSecret, null);
 ```
 
 ### Creating a demo conference  
@@ -92,19 +93,19 @@ VoxeetSdk.createConference();
 
 ```java
 // Used to join someone's conference otherwise joining is automatic
-VoxeetSdk.joinConference(String conferenceId);
+VoxeetSdk.joinSdkConference(String conferenceId);
 ```
 
 ### Leaving a conference  
 
 ```java
-VoxeetSdk.leaveConference();
+VoxeetSdk.leaveSdkConference();
 ```
 
 ### Checking if a conference is live  
 
 ```java
-VoxeetSdk.isLive();
+VoxeetSdk.isSdkConferenceLive();
 ```
 
 ### Changing user position  
@@ -113,13 +114,6 @@ VoxeetSdk.isLive();
 // Change user position using an angle and a distance
 // Values for x, y are between : x = [-1, 1] and y = [0, 1]
 VoxeetSdk.changePeerPosition(String userId, double x, double y);
-```
-
-### Playing a sound
-
-```java
-// Sound has to be placed in the asset folder
-VoxeetSdk.playSound(String path, double angle, double distance);
 ```
 
 ### Sending message in a conference
@@ -133,53 +127,53 @@ VoxeetSdk.sendBroadcastMessage(String message);
 
 ```java
 // Get current conference users
-VoxeetSdk.getConferenceUsers();
+VoxeetSdk.sendSdkBroadcast();
 ```
 
 ### Getting microphone state
 
 ```java
 // Get current conference users
-VoxeetSdk.isMuted();
+VoxeetSdk.isSdkMuted();
 ```
 
 ### Muting microphone
 
 ```java
 // Get current conference users
-VoxeetSdk.muteConference(boolean mute);
+VoxeetSdk.muteSdkConference(boolean mute);
 ```
 
 ### Muting user
 
 ```java
 // Muting or unmmuting an user depending on the boolean value
-VoxeetSdk.muteUSer(String userId, boolean mute);
+VoxeetSdk.muteSdkUser(String userId, boolean mute);
 ```
 
 ### Checking if a user is muted
 
 ```java
-VoxeetSdk.isUserMuted(String userId);
+VoxeetSdk.isSdkUserMuted(String userId);
 ```
 
 ### Getting available audio routes
 
 ```java
 // Get available audio routes
-VoxeetSdk.getAvailableRoutes();
+VoxeetSdk.getSdkAvailableRoutes();
 ```
 
 ### Getting current audio route
 
 ```java
-VoxeetSdk.currentRoute();
+VoxeetSdk.currentSdkRoute();
 ```
 
 ### Setting audio route
 
 ```java
-VoxeetSdk.setAudioRoute(AudioRoute route);
+VoxeetSdk.setSdkoutputRoute(AudioRoute route);
 ```
 
 ### Registering the SDK
@@ -228,14 +222,10 @@ protected void onDestroy() {
 
 ## ConferenceUser Model
 
-ConferenceUser model now has an userInfo object where infos are stored such as the external user id, the url avatar and display name. it also contains the angle and distance related to each user in the userPosition attribute.
+ConferenceUser model now has an userInfo object where infos are stored such as the external user id, the url avatar and display name.
 
 ```java
 public UserInfo getUserInfo();
-```
-
-```java
-public Position getUserPosition();
 ```
 
 ## Events
@@ -247,7 +237,7 @@ The SDK will dispatch events to the suscribed classes such as activities and fra
 
 ```java
 @Subscribe
-public void onEvent(final ConferenceJoined event) {
+public void onEvent(final ConferenceJoinedSuccessEvent event) {
     // Action to be called when joining successfully the conference
 }
 ```
@@ -264,7 +254,7 @@ public void onEvent(final ConferenceJoinedError event) {
 
 ```java
 @Subscribe
-public void onEvent(final ConferenceLeft event) {
+public void onEvent(final ConferenceLeftSuccessEvent event) {
     // Action to be called when leaving successfully the conference
 }
 ```
@@ -281,7 +271,7 @@ public void onEvent(final ConferenceLeftError event) {
 ### Participant added
 ```java
 @Subscribe
-public void onEvent(final ParticipantAdded event) {
+public void onEvent(final ConferenceUserJoinedEvent event) {
     // Action to be called when a new participant joins the conference
 }
 ```
@@ -289,7 +279,7 @@ public void onEvent(final ParticipantAdded event) {
 ### Participant status updated
 ```java
 @Subscribe
-public void onEvent(final ParticipantUpdated event) {
+public void onEvent(final ConferenceUserUpdateEvent event) {
     // Action to be called when a participant has left for example
 }
 ```
@@ -307,7 +297,7 @@ public void onEvent(MessageReceived event) {
 Only one instance of a conference is allowed to be live. Leaving the current conference before creating or joining another one is mandatory. Otherwise, a IllegalStateException will be thrown.
 
 ## Version
-0.8.45
+0.7.750
 
 ## Tech
 
