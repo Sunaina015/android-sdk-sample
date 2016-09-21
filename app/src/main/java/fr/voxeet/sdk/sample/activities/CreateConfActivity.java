@@ -1,6 +1,8 @@
 package fr.voxeet.sdk.sample.activities;
 
 import android.Manifest;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -279,10 +281,37 @@ public class CreateConfActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onBackPressed() {
+        if (VoxeetSdk.isSdkConferenceLive())
+            displayLeaveDialog();
+        else
+            super.onBackPressed();
+    }
+
+    private void displayLeaveDialog() {
+        final AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+        alertDialog.setTitle(getString(R.string.leave_conference_title));
+        alertDialog.setMessage(getString(R.string.leave_conference_message));
+        alertDialog.setCancelable(false);
+        alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, getString(R.string.ok), new DialogInterface.OnClickListener() {
+
+            public void onClick(DialogInterface dialog, int id) {
+                VoxeetSdk.leaveSdkConference();
+            }
+        });
+        alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, getString(R.string.cancel), new DialogInterface.OnClickListener() {
+
+            public void onClick(DialogInterface dialog, int id) {
+                alertDialog.dismiss();
+            }
+        });
+        alertDialog.show();
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
 
-        VoxeetSdk.unregister(this);
     }
 
     @Subscribe
@@ -308,6 +337,8 @@ public class CreateConfActivity extends AppCompatActivity {
 
     @Subscribe
     public void onEvent(final ConferenceLeftSuccessEvent event) {
+        VoxeetSdk.unregister(this);
+
         finish();
     }
 

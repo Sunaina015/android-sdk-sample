@@ -5,4 +5,8 @@
     <string name="demo">Conference demo</string>
     <string name="create_conf">Create Conference</string>
     <string name="participant_number">#%1$d</string>
+    <string name="ok">Okey</string>
+    <string name="cancel">Cancel</string>
+    <string name="leave_conference_title">Leave conference</string>
+    <string name="leave_conference_message">A conference is live. Would you like to leave it ?</string>
 </resources>
