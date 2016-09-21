@@ -76,6 +76,8 @@ public class CreateConfActivity extends AppCompatActivity {
 
     private boolean isDemo;
 
+    private boolean isInit;
+
     private ConferenceOutput conferenceOutput = null;
 
     private ScreenShareView screenShare;
@@ -162,6 +164,12 @@ public class CreateConfActivity extends AppCompatActivity {
         this.join.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (!isInit) {
+                    isInit = true;
+
+                    VoxeetSdk.register(CreateConfActivity.this);
+                }
+
                 VoxeetSdk.joinSdkConference(editextConference.getText().toString());
 
                 leave.setVisibility(View.VISIBLE);
@@ -249,13 +257,14 @@ public class CreateConfActivity extends AppCompatActivity {
         if (getIntent().hasExtra("joinConf") && getIntent().getBooleanExtra("joinConf", false))
             displayJoin();
         else {
-            if (getIntent().hasExtra("demo") && getIntent().getBooleanExtra("demo", false)) {
-                isDemo = true;
+            if (getIntent().hasExtra("demo") && getIntent().getBooleanExtra("demo", false))
                 VoxeetSdk.createSdkDemo();
-            } else {
-                isDemo = false;
+            else
                 VoxeetSdk.createSdkConference();
-            }
+
+            isDemo = getIntent().getBooleanExtra("demo", false);
+
+            isInit = true;
 
             VoxeetSdk.register(this);
         }
