@@ -58,6 +58,8 @@ public class CreateConfActivity extends AppCompatActivity {
 
     private ViewGroup conferenceOptions;
 
+    private ViewGroup sendText;
+
     private Button join;
 
     private Button audioRoutes;
@@ -155,6 +157,8 @@ public class CreateConfActivity extends AppCompatActivity {
         this.aliasId = (TextView) findViewById(R.id.conference_alias);
 
         this.conferenceOptions = (ViewGroup) findViewById(R.id.conference_options);
+
+        this.sendText = (ViewGroup) findViewById(R.id.text_layout);
 
         this.capturer = VideoCapturerAndroid.create(CameraEnumerationAndroid.getNameOfFrontFacingDevice(), null);
 
@@ -289,6 +293,8 @@ public class CreateConfActivity extends AppCompatActivity {
                 joinLayout.setVisibility(View.GONE);
 
                 conferenceOptions.setVisibility(View.VISIBLE);
+
+                sendText.setVisibility(View.VISIBLE);
 
                 if (!isDemo) {
                     aliasId.setVisibility(View.VISIBLE);

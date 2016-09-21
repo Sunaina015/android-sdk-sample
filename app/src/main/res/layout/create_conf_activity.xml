@@ -2,7 +2,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimary"
     android:orientation="vertical"
     android:padding="10dp">
 
@@ -19,7 +18,7 @@
             android:layout_height="match_parent"
             android:layout_gravity="center"
             android:layout_weight="1"
-            android:background="@color/colorAccent"
+            android:background="@color/colorPrimary"
             android:text="Leave"
             android:layout_margin="1dp"
             android:textColor="@color/white"
@@ -32,7 +31,7 @@
             android:layout_weight="1"
             android:layout_margin="1dp"
             android:layout_gravity="center"
-            android:background="@color/colorAccent"
+            android:background="@color/colorPrimary"
             android:text="audio"
             android:textColor="@android:color/white"
             android:visibility="visible" />
@@ -44,7 +43,7 @@
             android:layout_weight="1"
             android:layout_margin="1dp"
             android:layout_gravity="center"
-            android:background="@color/colorAccent"
+            android:background="@color/colorPrimary"
             android:text="mute"
             android:textColor="@android:color/white"
             android:visibility="visible" />
@@ -102,7 +101,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_gravity="center"
-            android:background="@color/colorAccent"
+            android:background="@color/colorPrimary"
             android:text="Join"
             android:textColor="@android:color/white"
             android:visibility="visible" />
@@ -115,7 +114,7 @@
         android:layout_height="wrap_content"
         android:gravity="top|center"
         android:padding="10dp"
-        android:textColor="@color/colorAccent"
+        android:textColor="@color/colorPrimary"
         android:textSize="20sp"
         android:textStyle="bold"
         android:visibility="gone" />
@@ -123,6 +122,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:id="@+id/text_layout"
         android:padding="10dp">
 
         <EditText
@@ -142,7 +143,7 @@
             android:layout_height="40dp"
             android:layout_gravity="center"
             android:layout_weight="1"
-            android:background="@color/colorAccent"
+            android:background="@color/colorPrimary"
             android:text="Send"
             android:textColor="@color/white"
             android:visibility="visible" />
