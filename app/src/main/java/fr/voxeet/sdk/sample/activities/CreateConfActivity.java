@@ -256,9 +256,9 @@ public class CreateConfActivity extends AppCompatActivity {
                 isDemo = false;
                 VoxeetSdk.createSdkConference();
             }
-        }
 
-        VoxeetSdk.register(this);
+            VoxeetSdk.register(this);
+        }
     }
 
     private void displayJoin() {

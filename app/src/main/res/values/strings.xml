@@ -1,5 +1,8 @@
 <resources>
     <!--/Replace with the one given by Voxeet-->
+    <string name="consumer_key">NGZmcHUxYm5hYzNlYQ</string>
+    <string name="consumer_secret">NDJwaDkyZ2MwcHRvc25uMWlsdnA0ZDZlcmo</string>
+
     <string name="app_name">Voxeet Sample</string>
     <string name="action_settings">Settings</string>
     <string name="demo">Conference demo</string>
