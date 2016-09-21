@@ -19,6 +19,7 @@
         android:layout_height="wrap_content"
         android:background="@color/colorPrimary"
         android:textColor="@color/white"
+        android:enabled="false"
         android:text="Conference Demo" />
 
     <Button
@@ -26,6 +27,7 @@
         android:layout_marginTop="10dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:enabled="false"
         android:background="@color/colorPrimary"
         android:textColor="@color/white"
         android:text="Create Conference" />
@@ -35,6 +37,7 @@
         android:layout_marginTop="10dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:enabled="false"
         android:background="@color/colorPrimary"
         android:textColor="@color/white"
         android:text="Join Conference" />

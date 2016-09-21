@@ -12,7 +12,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+
 import fr.voxeet.sdk.sample.R;
+import voxeet.com.sdk.events.success.SocketConnectEvent;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -83,6 +87,8 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 
         setSupportActionBar(toolbar);
+
+        EventBus.getDefault().register(this);
 
         demoCall = (Button) findViewById(R.id.demo);
         demoCall.setOnClickListener(new View.OnClickListener() {
@@ -161,6 +167,20 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Subscribe
+    public void onEvent(SocketConnectEvent event) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                demoCall.setEnabled(true);
+
+                createConf.setEnabled(true);
+
+                joinConf.setEnabled(true);
+            }
+        });
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -174,5 +194,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+
+        EventBus.getDefault().unregister(this);
     }
 }
