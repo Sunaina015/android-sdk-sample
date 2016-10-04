@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:padding="10dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -51,31 +55,6 @@
     </LinearLayout>
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <fr.voxeet.sdk.sample.ScreenShareView
-            android:layout_width="@dimen/screen_preview_width"
-            android:layout_height="@dimen/screen_preview_height"
-            android:layout_gravity="center"
-            android:padding="5dp"
-            android:visibility="gone"
-            android:layout_weight="1"
-            android:id="@+id/screen_share"/>
-
-        <fr.voxeet.sdk.sample.ScreenShareView
-            android:layout_width="@dimen/screen_preview_width"
-            android:layout_height="@dimen/screen_preview_height"
-            android:layout_gravity="center"
-            android:padding="5dp"
-            android:layout_weight="1"
-            android:visibility="gone"
-            android:id="@+id/video_stream"/>
-
-    </LinearLayout>
-
-    <LinearLayout
         android:id="@+id/join_conf_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -91,9 +70,9 @@
             android:layout_weight="3"
             android:hint="Conference id"
             android:imeOptions="actionDone"
-            android:singleLine="true"
             android:textColor="@android:color/white"
-            android:textColorHint="@android:color/white" />
+            android:textColorHint="@android:color/white"
+            android:maxLines="1" />
 
         <Button
             android:id="@+id/join"
@@ -150,16 +129,29 @@
 
     </LinearLayout>
 
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
         <ListView
             android:id="@+id/participants"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginTop="10dp" />
 
-    </FrameLayout>
+    </LinearLayout>
 
-</LinearLayout>
+    <fr.voxeet.sdk.sample.ScreenShareView
+        android:layout_width="@dimen/screen_preview_width"
+        android:layout_height="@dimen/screen_preview_height"
+        android:layout_gravity="bottom|left"
+        android:padding="5dp"
+        android:visibility="gone"
+        android:id="@+id/screen_share"/>
+
+    <fr.voxeet.sdk.sample.ScreenShareView
+        android:layout_width="75dp"
+        android:layout_height="60dp"
+        android:padding="1dp"
+        android:layout_gravity="bottom|right"
+        android:layout_marginRight="10dp"
+        android:visibility="gone"
+        android:id="@+id/video_stream"/>
+
+</FrameLayout>

@@ -1,6 +1,8 @@
 package fr.voxeet.sdk.sample.adapters;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -82,14 +84,12 @@ public class ParticipantAdapter extends BaseAdapter {
     }
 
     public ConferenceUser doesContain(final ConferenceUser user) {
-        final ConferenceUser model = Iterables.find(participants, new Predicate<ConferenceUser>() {
+        return Iterables.find(participants, new Predicate<ConferenceUser>() {
             @Override
             public boolean apply(ConferenceUser input) {
                 return user.getUserId().equalsIgnoreCase(input.getUserId());
             }
         }, null);
-
-        return model;
     }
 
     public void addParticipant(ConferenceUser conferenceUser) {
@@ -143,13 +143,11 @@ public class ParticipantAdapter extends BaseAdapter {
         holder.position.setText(context.getResources().getString(R.string.participant_number, (position + 1)));
 
         UserInfo info = user.getUserInfo();
-//        if (info != null && info.getAvatarUrl() != null && info.getAvatarUrl().length() > 0) {
-//            holder.avatar.setVisibility(View.VISIBLE);
-//
-//            Picasso.with(context).load(info.getAvatarUrl()).into(holder.avatar);
-//        }
 
-        if (mediaStreamMap.containsKey(user.getUserId())) {
+        if (!holder.avatar.isAttached() && mediaStreamMap.containsKey(user.getUserId())) {
+            holder.avatar.setVisibility(View.VISIBLE);
+            holder.avatar.setAttached(true);
+
             VoxeetSdk.attachMediaSdkStream(user.getUserId(), mediaStreamMap.get(user.getUserId()), holder.avatar.getRenderer());
 
             mediaStreamMap.remove(user.getUserId());
@@ -207,7 +205,6 @@ public class ParticipantAdapter extends BaseAdapter {
     }
 
     private void updatePosition(String userId, int x, int y) {
-
         // angle has to be between -1 and 1
         double angle = ((double) x / 100.0) - 1.0;
 
@@ -228,32 +225,16 @@ public class ParticipantAdapter extends BaseAdapter {
         return -1;
     }
 
-    public View getViewByPosition(final String peerId, ListView listView) {
-        final int pos = getItemAt(peerId);
-
-        if (pos == -1)
-            return null;
-
-        final int firstListItemPosition = listView.getFirstVisiblePosition();
-
-        final int lastListItemPosition = firstListItemPosition + listView.getChildCount() - 1;
-
-        if (pos < firstListItemPosition || pos > lastListItemPosition) {
-            return listView.getAdapter().getView(pos, null, listView);
-        } else {
-            final int childIndex = pos - firstListItemPosition;
-
-            return listView.getChildAt(childIndex);
-        }
-    }
-
     @Subscribe
-    public void onEvent(VideoStreamAddedEvent event) {
+    public void onEvent(final VideoStreamAddedEvent event) {
         mediaStreamMap.put(event.getPeer(), event.getMediaStream());
-    }
 
-    public RoomPosition getUserPosition(String userId) {
-        return positionMap.get(userId);
+        new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                notifyDataSetChanged();
+            }
+        });
     }
 
     private class ViewHolder {

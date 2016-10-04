@@ -13,8 +13,10 @@
         android:orientation="horizontal">
 
         <fr.voxeet.sdk.sample.VideoView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="75dp"
+            android:layout_height="60dp"
+            android:visibility="gone"
+            android:layout_marginBottom="5dp"
             android:id="@+id/avatar"/>
 
         <TextView
