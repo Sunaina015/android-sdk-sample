@@ -120,10 +120,9 @@ public class ParticipantAdapter extends BaseAdapter {
 
         final ViewHolder holder;
         if (convertView == null) {
-            holder = new ViewHolder();
-
             convertView = inflater.inflate(R.layout.participants_cell, parent, false);
 
+            holder = new ViewHolder();
             holder.userId = (TextView) convertView.findViewById(R.id.user_id);
             holder.device = (TextView) convertView.findViewById(R.id.device);
             holder.position = (TextView) convertView.findViewById(R.id.position);

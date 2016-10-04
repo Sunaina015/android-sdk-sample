@@ -20,10 +20,7 @@ public class VideoView extends FrameLayout {
     private final String TAG = VideoView.class.getSimpleName();
 
     private boolean isAttached = false;
-
-    @Bind(R.id.container)
-    protected FrameLayout container;
-
+    
     @Bind(R.id.renderer)
     protected SurfaceViewRenderer renderer;
 
@@ -48,7 +45,7 @@ public class VideoView extends FrameLayout {
     }
 
     public void setSurfaceViewRenderer() {
-        this.renderer.init(VoxeetSdk.getEglContext(), null);
+        this.renderer.init(VoxeetSdk.getSdkEglContext(), null);
 
         this.renderer.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FIT);
     }

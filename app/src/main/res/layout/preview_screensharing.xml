@@ -3,12 +3,12 @@
     android:id="@+id/container"
     android:layout_width="@dimen/screen_preview_width"
     android:layout_height="@dimen/screen_preview_height"
-    android:padding="5dip">
+    android:padding="1dip">
 
     <com.voxeet.android.media.video.SurfaceViewRenderer
         android:id="@+id/renderer"
-        android:layout_width="@dimen/screen_preview_width_padding"
-        android:layout_height="@dimen/screen_preview_height_padding"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_gravity="center" />
 
 </FrameLayout>
