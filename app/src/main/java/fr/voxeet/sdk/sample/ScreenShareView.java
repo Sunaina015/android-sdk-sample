@@ -89,7 +89,7 @@ public class ScreenShareView extends FrameLayout {
 
         defaultParams = new LayoutParams(
                 defaultWith,
-                defaultHbueight);
+                defaultHeight);
         defaultParams.gravity = Gravity.TOP | Gravity.RIGHT;
 
         renderParams = new LayoutParams(
