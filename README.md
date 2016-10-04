@@ -204,7 +204,14 @@ VoxeetSdk.setMediaSdkStreamListener(Media.MediaStreamListener listener);
 
 ```java
 // Attach the renderer to the media so we can get the rendering working
-VoxeetSdk.attachMediaSdkStream(String peerId, MediaStream stream, VideoRenderer.Callbacks render) 
+VoxeetSdk.attachMediaSdkStream(String peerId, MediaStream stream, VideoRenderer.Callbacks render);
+```
+
+### Unattaching the media stream
+
+```java
+// Unattach the renderers to the media to avoid leaks
+VoxeetSdk.unAttachMediaSdkStream(String peerId, MediaStream stream);
 ```
 
 ### Setting up the Video capturer
@@ -214,7 +221,7 @@ VoxeetSdk.attachMediaSdkStream(String peerId, MediaStream stream, VideoRenderer.
 VideoCapturer capturer = VideoCapturerAndroid.create(CameraEnumerationAndroid.getNameOfFrontFacingDevice(), null);
 
 // Use to retrieved the front camera stream
-VoxeetSdk.setSdkVideoCapturer(VideoCapturer capturer)
+VoxeetSdk.setSdkVideoCapturer(VideoCapturer capturer);
 ```
 
 ## SDK Initialization
@@ -247,7 +254,7 @@ protected void onCreate(Bundle savedInstanceState) {
     VideoCapturer capturer = VideoCapturerAndroid.create(CameraEnumerationAndroid.getNameOfFrontFacingDevice(), null);
 
     // Use to retrieved the front camera stream
-    VoxeetSdk.setSdkVideoCapturer(VideoCapturer capturer)
+    VoxeetSdk.setSdkVideoCapturer(VideoCapturer capturer);
     
     VoxeetSdk.setMediaSdkStreamListener(listener);
 }
