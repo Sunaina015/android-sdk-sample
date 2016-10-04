@@ -71,7 +71,7 @@ Add your consumer key & secret to the xml string file of your application.
 
 ```java
  <string name="consumer_key">your consumer key</string>
- <string name="consumer_password">your consumer password</string>
+ <string name="consumer_secret">your consumer password</string>
 ```
 
 ## Available methods
