@@ -129,6 +129,12 @@ VoxeetSdk.changePeerPosition(String userId, double x, double y);
 VoxeetSdk.sendSdkBroadcast(String message);
 ```
 
+### Knowing if a conference is live
+
+```java
+VoxeetSdk.isSdkConferenceLive();
+```
+
 ### Getting current conference users
 
 ```java
