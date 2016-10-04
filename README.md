@@ -7,16 +7,16 @@ The SDK is a Java library allowing users to:
   - Change sounds angle and direction for each conference user
   - Broadcast messages to other participants
   - Mute users/conferences
-  - If you use External login like O365, LDAP, or custom login to retrieve contact details, it is now possible to also add your contact    ID with the display name and the photo urrl avatar.
+  - If you use External login like O365, LDAP, or custom login to retrieve contact details, it is now possible to also add your contact ID with the display name and the photo url avatar.
     This allows you to ask guest users to introduce themselves and provide their display name and for your authenticated users in your enterprise or for your clients the ID that can be retrieved from O365 (name, department, etc).
 
 ### Installing the Android SDK using Gradle
 
-To install the SDK directly into your Android project using the Grade build system and an IDE like Android Studio, add the following entry: "compile 'com.voxeet.sdk:core:0.7.750'" to your build.gradle file as shown below:
+To install the SDK directly into your Android project using the Grade build system and an IDE like Android Studio, add the following entry: "compile 'com.voxeet.sdk:core:0.7.763'" to your build.gradle file as shown below:
 
 ```java
 dependencies {
-    compile 'com.voxeet.sdk:core:0.7.750'
+    compile 'com.voxeet.sdk:core:0.7.763'
 }
 ```
 ### Recommended settings for API compatibility:
@@ -37,11 +37,17 @@ android {
 Add the following permissions to your Android Manifest file:
 
 ```java
-  <uses-permission android:name="android.permission.INTERNET" />
-  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-  <uses-permission android:name="android.permission.WAKE_LOCK" />
-  <uses-permission android:name="android.permission.BLUETOOTH" />
-  <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />    
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <uses-feature android:name="android.hardware.camera" />
 
   // Used to change audio routes
   <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
@@ -80,13 +86,13 @@ VoxeetSdk.sdkInitialize(Context context, String consumerKey, String consumerSecr
 ### Creating a demo conference  
 
 ```java
-VoxeetSdk.createDemoConference();
+VoxeetSdk.createSdkDemo();
 ```
 
 ### Creating a conference  
 
 ```java
-VoxeetSdk.createConference();
+VoxeetSdk.createSdkConference();
 ```
 
 ### Joining a conference  
@@ -120,27 +126,24 @@ VoxeetSdk.changePeerPosition(String userId, double x, double y);
 
 ```java
 // Send messages such as JSON commands...
-VoxeetSdk.sendBroadcastMessage(String message);
+VoxeetSdk.sendSdkBroadcast(String message);
 ```
 
 ### Getting current conference users
 
 ```java
-// Get current conference users
-VoxeetSdk.sendSdkBroadcast();
+VoxeetSdk.getConferenceUsers();
 ```
 
 ### Getting microphone state
 
 ```java
-// Get current conference users
 VoxeetSdk.isSdkMuted();
 ```
 
 ### Muting microphone
 
 ```java
-// Get current conference users
 VoxeetSdk.muteSdkConference(boolean mute);
 ```
 
@@ -190,6 +193,29 @@ VoxeetSdk.register(Context context);
 VoxeetSdk.unregister(Context context);
 ```
 
+### Register the media stream listener
+
+```java
+VoxeetSdk.setMediaSdkStreamListener(Media.MediaStreamListener listener);
+```
+
+### Attach media stream
+
+```java
+// Attach renderer to the media so we can the rendering working
+VoxeetSdk.attachMediaSdkStream(String peerId, MediaStream stream, VideoRenderer.Callbacks render) 
+```
+
+### Set the Video capturer
+
+```java
+//Init the video capturer in the onCreate of your activity.
+VideoCapturer capturer = VideoCapturerAndroid.create(CameraEnumerationAndroid.getNameOfFrontFacingDevice(), null);
+
+// Use to retrieved the front camera stream
+VoxeetSdk.setSdkVideoCapturer(VideoCapturer capturer)
+```
+
 ## SDK Initialization
 
 Initialize the SDK in the onCreate() method of your application class:
@@ -218,6 +244,37 @@ protected void onDestroy() {
     super.onDestroy();
     VoxeetSdk.unregister(this);  
 }   
+```
+
+## Media Stream Listener
+
+The media stream listener is set of callbacks used to let you know when video streams & screen share streams are added / removed. 
+
+```java
+private Media.MediaStreamListener mediaStreamListener = new Media.MediaStreamListener() {
+                
+        @Override
+        public void onStreamAdded(String peer, MediaStream stream) {
+          // use VoxeetSdk.attachMediaSdkStream(peer, stream, yourRenderer);
+        }
+
+        @Override
+        public void onStreamRemoved(String peer) {
+          // use VoxeetSdk.unAttachMediaSdkStream(peer, stream);
+        }
+
+        @Override
+        public void onScreenStreamAdded(final String peer, final MediaStream stream) {
+          // use VoxeetSdk.attachMediaSdkStream(peer, stream, yourRenderer);
+        }
+
+        @Override
+        public void onScreenStreamRemoved(String peer) {
+          // use VoxeetSdk.unAttachMediaSdkStream(peer, stream);
+        }
+    };
+    
+    NB: yourRenderer can be a custom object like the VideoView or the ScreenShareView included in the sample.
 ```
 
 ## ConferenceUser Model
@@ -297,7 +354,7 @@ public void onEvent(MessageReceived event) {
 Only one instance of a conference is allowed to be live. Leaving the current conference before creating or joining another one is mandatory. Otherwise, a IllegalStateException will be thrown.
 
 ## Version
-0.7.750
+0.7.763
 
 ## Tech
 
