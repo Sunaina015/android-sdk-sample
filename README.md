@@ -193,20 +193,21 @@ VoxeetSdk.register(Context context);
 VoxeetSdk.unregister(Context context);
 ```
 
-### Register the media stream listener
+### Registering the media stream listener
 
 ```java
+// Get notified when streams are added/removed
 VoxeetSdk.setMediaSdkStreamListener(Media.MediaStreamListener listener);
 ```
 
-### Attach media stream
+### Attaching the media stream
 
 ```java
-// Attach renderer to the media so we can the rendering working
+// Attach the renderer to the media so we can get the rendering working
 VoxeetSdk.attachMediaSdkStream(String peerId, MediaStream stream, VideoRenderer.Callbacks render) 
 ```
 
-### Set the Video capturer
+### Setting up the Video capturer
 
 ```java
 //Init the video capturer in the onCreate of your activity.
@@ -234,21 +235,34 @@ In order to work properly, it is necessary to register and unregister the SDK re
 
 ```java
 @Override
+
+private Media.MediaStreamListener listener; // needs to be initialized
+
 protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    VoxeetSdk.register(this);  
+    
+    VoxeetSdk.register(this);
+    
+    //Init the video capturer in the onCreate of your activity.
+    VideoCapturer capturer = VideoCapturerAndroid.create(CameraEnumerationAndroid.getNameOfFrontFacingDevice(), null);
+
+    // Use to retrieved the front camera stream
+    VoxeetSdk.setSdkVideoCapturer(VideoCapturer capturer)
+    
+    VoxeetSdk.setMediaSdkStreamListener(listener);
 }
 
 @Override
 protected void onDestroy() {
     super.onDestroy();
+    
     VoxeetSdk.unregister(this);  
 }   
 ```
 
 ## Media Stream Listener
 
-The media stream listener is set of callbacks used to let you know when video streams & screen share streams are added / removed. 
+The media stream listener is a set of callbacks used to let you know when video streams & screen share streams are added / removed. 
 
 ```java
 private Media.MediaStreamListener mediaStreamListener = new Media.MediaStreamListener() {
