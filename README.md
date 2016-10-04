@@ -308,7 +308,7 @@ public UserInfo getUserInfo();
 
 ## Events
 
-The SDK will dispatch events to the suscribed classes such as activities and fragments holding the conferences. To get notified, the only necessary step is to add those 4 methods below:
+The SDK will dispatch events to the suscribed classes such as activities and fragments holding the conferences. To get notified, the only necessary step is to add those methods below:
 
 
 ### Conference joined
