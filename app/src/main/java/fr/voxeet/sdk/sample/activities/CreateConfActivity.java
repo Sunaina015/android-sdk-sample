@@ -33,6 +33,7 @@ import fr.voxeet.sdk.sample.adapters.ParticipantAdapter;
 import fr.voxeet.sdk.sample.dialogs.ConferenceOutput;
 import voxeet.com.sdk.core.VoxeetPreferences;
 import voxeet.com.sdk.core.VoxeetSdk;
+import voxeet.com.sdk.events.success.ConferenceCreationSuccess;
 import voxeet.com.sdk.events.success.ConferenceJoinedSuccessEvent;
 import voxeet.com.sdk.events.success.ConferenceLeftSuccessEvent;
 import voxeet.com.sdk.events.success.ConferenceUserJoinedEvent;
