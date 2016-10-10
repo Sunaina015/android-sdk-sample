@@ -17,7 +17,7 @@
         android:id="@+id/demo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorPrimary"
+        android:background="@drawable/main_activity_button"
         android:textColor="@color/white"
         android:enabled="false"
         android:text="Conference Demo" />
@@ -28,7 +28,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:enabled="false"
-        android:background="@color/colorPrimary"
+        android:background="@drawable/main_activity_button"
         android:textColor="@color/white"
         android:text="Create Conference" />
 
@@ -38,7 +38,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:enabled="false"
-        android:background="@color/colorPrimary"
+        android:background="@drawable/main_activity_button"
         android:textColor="@color/white"
         android:text="Join Conference" />
 
