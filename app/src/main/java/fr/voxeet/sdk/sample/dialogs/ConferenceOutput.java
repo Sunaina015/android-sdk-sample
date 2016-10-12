@@ -1,8 +1,10 @@
 package fr.voxeet.sdk.sample.dialogs;
 
+import android.annotation.SuppressLint;
 import android.app.DialogFragment;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,12 +26,14 @@ import voxeet.com.sdk.core.VoxeetSdk;
  * Created by Thomas on 08/12/2015.
  */
 public class ConferenceOutput extends DialogFragment {
+
     public static final String TAG = ConferenceOutput.class.getSimpleName();
 
-    protected ListView outputListView;
+    private ListView outputListView;
 
     private List<Media.AudioRoute> currentRoutes;
 
+    @NonNull
     private List<String> routesDescription = Arrays.asList("Headset", "Phone", "Speaker", "Bluetooth");
 
     private Context context;
@@ -37,12 +41,13 @@ public class ConferenceOutput extends DialogFragment {
     public ConferenceOutput() {
     }
 
+    @SuppressLint("ValidFragment")
     public ConferenceOutput(Context context) {
         this.context = context;
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.dialog_conference_output, container, true);
 
         outputListView = (ListView) v.findViewById(R.id.output_list_view);
@@ -57,6 +62,8 @@ public class ConferenceOutput extends DialogFragment {
         outputListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                currentRoutes = VoxeetSdk.getSdkAvailableRoutes();
+
                 VoxeetSdk.setSdkoutputRoute(currentRoutes.get(position));
 
                 dismiss();
