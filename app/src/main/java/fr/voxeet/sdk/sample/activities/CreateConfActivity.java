@@ -327,7 +327,7 @@ public class CreateConfActivity extends AppCompatActivity {
 
                 if (!isDemo) {
                     aliasId.setVisibility(View.VISIBLE);
-                    aliasId.setText(event.getAliasId());
+                    aliasId.setText(event.getAliasId() != null ? event.getAliasId() : event.getConferenceId());
                 }
             }
         });
