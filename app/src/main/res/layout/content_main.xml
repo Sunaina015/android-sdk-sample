@@ -42,4 +42,14 @@
         android:textColor="@color/white"
         android:text="Join Conference" />
 
+    <Button
+        android:id="@+id/replay_conf"
+        android:layout_marginTop="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:enabled="false"
+        android:background="@drawable/main_activity_button"
+        android:textColor="@color/white"
+        android:text="Replay Conference" />
+
 </LinearLayout>

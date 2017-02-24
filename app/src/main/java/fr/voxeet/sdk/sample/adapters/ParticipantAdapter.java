@@ -1,23 +1,18 @@
 package fr.voxeet.sdk.sample.adapters;
 
 import android.content.Context;
-import android.os.Handler;
-import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
+import com.squareup.picasso.Picasso;
 import com.voxeet.android.media.MediaStream;
-
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,12 +20,12 @@ import java.util.List;
 import java.util.Map;
 
 import fr.voxeet.sdk.sample.R;
-import fr.voxeet.sdk.sample.VideoView;
 import voxeet.com.sdk.core.VoxeetSdk;
-import voxeet.com.sdk.events.success.VideoStreamAddedEvent;
 import voxeet.com.sdk.json.UserInfo;
 import voxeet.com.sdk.models.abs.ConferenceUser;
 import voxeet.com.sdk.models.impl.DefaultConferenceUser;
+import voxeet.com.sdk.views.RoundedImageView;
+import voxeet.com.sdk.views.VideoView;
 
 /**
  * Created by RomainB on 4/21/16.
@@ -48,11 +43,11 @@ public class ParticipantAdapter extends BaseAdapter {
 
     private Map<String, MediaStream> mediaStreamMap;
 
-    public class RoomPosition {
-        public double angle;
-        public double distance;
+    private class RoomPosition {
+        double angle;
+        double distance;
 
-        public RoomPosition(double angle, double distance) {
+        RoomPosition(double angle, double distance) {
             this.angle = angle;
             this.distance = distance;
         }
@@ -68,22 +63,17 @@ public class ParticipantAdapter extends BaseAdapter {
         this.inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         this.positionMap = new HashMap<>();
-
-        EventBus.getDefault().register(this);
     }
 
-    public void updateParticipant(ConferenceUser conferenceUser) {
-        if (conferenceUser.getStatus().equalsIgnoreCase(ConferenceUser.Status.LEFT.name())) {
-            ConferenceUser user = doesContain(conferenceUser);
-            if (user != null) {
-                positionMap.remove(conferenceUser.getUserId());
-
-                participants.remove(user);
-            }
-        }
+    public void updateMediaStreams(Map<String, MediaStream> mediaStreamMap) {
+        this.mediaStreamMap = mediaStreamMap;
     }
 
-    public ConferenceUser doesContain(final ConferenceUser user) {
+    public void removeParticipant(ConferenceUser user) {
+        participants.remove(user);
+    }
+
+    private ConferenceUser doesContain(final ConferenceUser user) {
         return Iterables.find(participants, new Predicate<ConferenceUser>() {
             @Override
             public boolean apply(ConferenceUser input) {
@@ -117,18 +107,11 @@ public class ParticipantAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-
         final ViewHolder holder;
         if (convertView == null) {
             convertView = inflater.inflate(R.layout.participants_cell, parent, false);
 
-            holder = new ViewHolder();
-            holder.userId = (TextView) convertView.findViewById(R.id.user_id);
-            holder.device = (TextView) convertView.findViewById(R.id.device);
-            holder.position = (TextView) convertView.findViewById(R.id.position);
-            holder.angle = (SeekBar) convertView.findViewById(R.id.angle);
-            holder.distance = (SeekBar) convertView.findViewById(R.id.distance);
-            holder.avatar = (VideoView) convertView.findViewById(R.id.avatar);
+            holder = new ViewHolder(convertView);
 
             convertView.setTag(holder);
         } else {
@@ -143,13 +126,15 @@ public class ParticipantAdapter extends BaseAdapter {
 
         UserInfo info = user.getUserInfo();
 
-        if (!holder.avatar.isAttached() && mediaStreamMap.containsKey(user.getUserId())) {
-            holder.avatar.setVisibility(View.VISIBLE);
-            holder.avatar.setAttached(true);
-
-            VoxeetSdk.attachMediaSdkStream(user.getUserId(), mediaStreamMap.get(user.getUserId()), holder.avatar.getRenderer());
-
-            mediaStreamMap.remove(user.getUserId());
+        if (mediaStreamMap.containsKey(user.getUserId())) {
+            MediaStream mediaStream = mediaStreamMap.get(user.getUserId());
+            if (mediaStream.hasVideo()) {
+                holder.avatar.setVisibility(View.VISIBLE);
+                holder.avatar.attach(user.getUserId(), mediaStreamMap.get(user.getUserId()));
+            } else {
+                holder.avatar.setVisibility(View.GONE);
+                holder.avatar.unAttach();
+            }
         }
 
         if (info != null && info.getName() != null && info.getName().length() > 0)
@@ -157,6 +142,7 @@ public class ParticipantAdapter extends BaseAdapter {
         else
             holder.userId.setText(user.getUserId());
 
+        Picasso.with(context).load(info.getAvatarUrl()).into(holder.avatarImage);
         holder.avatar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -215,33 +201,35 @@ public class ParticipantAdapter extends BaseAdapter {
         VoxeetSdk.changePeerPosition(userId, angle, distance);
     }
 
-    public int getItemAt(final String peerId) {
-        for (int i = 0; i < participants.size(); i++) {
-            if (participants.get(i).getUserId().equalsIgnoreCase(peerId))
-                return i;
-        }
-
-        return -1;
-    }
-
-    @Subscribe
-    public void onEvent(final VideoStreamAddedEvent event) {
-        mediaStreamMap.put(event.getPeer(), event.getMediaStream());
-
-        new Handler(Looper.getMainLooper()).post(new Runnable() {
-            @Override
-            public void run() {
-                notifyDataSetChanged();
-            }
-        });
-    }
-
     private class ViewHolder {
         TextView userId;
+
         TextView device;
+
         TextView position;
+
         SeekBar angle;
+
         SeekBar distance;
+
         VideoView avatar;
+
+        RoundedImageView avatarImage;
+
+        ViewHolder(View convertView) {
+            userId = (TextView) convertView.findViewById(R.id.user_id);
+
+            device = (TextView) convertView.findViewById(R.id.device);
+
+            position = (TextView) convertView.findViewById(R.id.position);
+
+            angle = (SeekBar) convertView.findViewById(R.id.angle);
+
+            distance = (SeekBar) convertView.findViewById(R.id.distance);
+
+            avatar = (VideoView) convertView.findViewById(R.id.avatar);
+
+            avatarImage = (RoundedImageView) convertView.findViewById(R.id.avatar_image);
+        }
     }
 }

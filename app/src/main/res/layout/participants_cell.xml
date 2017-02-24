@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:padding="10dp">
 
@@ -12,12 +13,27 @@
         android:gravity="center"
         android:orientation="horizontal">
 
-        <fr.voxeet.sdk.sample.VideoView
+        <FrameLayout
             android:layout_width="75dp"
             android:layout_height="60dp"
-            android:visibility="gone"
-            android:layout_marginBottom="5dp"
-            android:id="@+id/avatar"/>
+            android:layout_marginBottom="5dp">
+
+            <voxeet.com.sdk.views.RoundedImageView
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:visibility="visible"
+                android:layout_gravity="center"
+                app:oval="true"
+                app:mutate_background="true"
+                android:id="@+id/avatar_image"/>
+
+            <voxeet.com.sdk.views.VideoView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone"
+                android:id="@+id/avatar"/>
+
+        </FrameLayout>
 
         <TextView
             android:id="@+id/position"

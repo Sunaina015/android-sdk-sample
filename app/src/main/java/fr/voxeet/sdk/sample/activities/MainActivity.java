@@ -2,6 +2,7 @@ package fr.voxeet.sdk.sample.activities;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -12,6 +13,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.provider.Settings;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -25,6 +27,9 @@ import org.greenrobot.eventbus.Subscribe;
 
 import java.util.Arrays;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 import fr.voxeet.sdk.sample.R;
 import voxeet.com.sdk.events.success.SocketConnectEvent;
 
@@ -34,17 +39,24 @@ public class MainActivity extends AppCompatActivity {
     private static final int RECORD_AUDIO_RESULT = 0x20;
     private static final int REQUEST_EXTERNAL_STORAGE = 0x21;
 
-    private static final int JOIN = 0x1000;
-    private static final int CREATE = 0x1010;
-    private static final int DEMO = 0x1020;
+    public static final int JOIN = 0x1000;
+    public static final int CREATE = 0x1010;
+    public static final int DEMO = 0x1020;
+    public static final int REPLAY = 0x1030;
 
     private int lastAction;
 
-    private Button demoCall;
+    @Bind(R.id.demo)
+    protected Button demoCall;
 
-    private Button createConf;
+    @Bind(R.id.create_conf)
+    protected Button createConf;
 
-    private Button joinConf;
+    @Bind(R.id.join_conf)
+    protected Button joinConf;
+
+    @Bind(R.id.replay_conf)
+    protected Button replayConf;
 
     private static String[] PERMISSIONS_STORAGE = {
             Manifest.permission.READ_EXTERNAL_STORAGE,
@@ -100,29 +112,7 @@ public class MainActivity extends AppCompatActivity {
 
         EventBus.getDefault().register(this);
 
-        demoCall = (Button) findViewById(R.id.demo);
-        demoCall.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startDemoCall();
-            }
-        });
-
-        createConf = (Button) findViewById(R.id.create_conf);
-        createConf.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                createConf();
-            }
-        });
-
-        joinConf = (Button) findViewById(R.id.join_conf);
-        joinConf.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                joinCall();
-            }
-        });
+        ButterKnife.bind(this);
 
         verifyStoragePermissions(this);
 
@@ -136,6 +126,26 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         }
+    }
+
+    @OnClick(R.id.demo)
+    public void demoButton() {
+        startDemoCall();
+    }
+
+    @OnClick(R.id.create_conf)
+    public void createButton() {
+        createConf();
+    }
+
+    @OnClick(R.id.join_conf)
+    public void joinButton() {
+        joinCall();
+    }
+
+    @OnClick(R.id.replay_conf)
+    public void replayButton() {
+        replayConf();
     }
 
     public void verifyStoragePermissions(Activity context) {
@@ -152,39 +162,45 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void startDemoCall() {
-        lastAction = DEMO;
+    private void replayConf() {
+        conferenceActivity(lastAction = REPLAY);
+    }
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED)
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, RECORD_AUDIO_RESULT);
-        else {
-            Intent intent = new Intent(MainActivity.this, CreateConfActivity.class);
-            intent.putExtra("demo", true);
-            MainActivity.this.startActivity(intent);
-        }
+    private void startDemoCall() {
+        conferenceActivity(lastAction = DEMO);
     }
 
     private void joinCall() {
-        lastAction = JOIN;
-
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED)
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, RECORD_AUDIO_RESULT);
-        else {
-            Intent intent = new Intent(MainActivity.this, CreateConfActivity.class);
-            intent.putExtra("joinConf", true);
-            MainActivity.this.startActivity(intent);
-        }
+        conferenceActivity(lastAction = JOIN);
     }
 
     private void createConf() {
-        lastAction = CREATE;
+        conferenceActivity(lastAction = CREATE);
+    }
 
+    public void conferenceActivity(int lastAction) {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED)
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, RECORD_AUDIO_RESULT);
         else {
             Intent intent = new Intent(MainActivity.this, CreateConfActivity.class);
-            intent.putExtra("demo", false);
-            MainActivity.this.startActivity(intent);
+
+            switch (lastAction) {
+                case DEMO:
+                    intent.putExtra("demo", true);
+                    break;
+                case CREATE:
+                    intent.putExtra("create", true);
+                    break;
+                case REPLAY:
+                    intent.putExtra("replay", true);
+                    break;
+                case JOIN:
+                default:
+                    intent.putExtra("join", true);
+                    break;
+            }
+
+            startActivity(intent);
         }
     }
 
@@ -198,6 +214,8 @@ public class MainActivity extends AppCompatActivity {
                 createConf.setEnabled(true);
 
                 joinConf.setEnabled(true);
+
+                replayConf.setEnabled(true);
             }
         });
     }

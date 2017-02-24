@@ -29,6 +29,18 @@
                 android:visibility="visible" />
 
             <Button
+                android:id="@+id/record"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_margin="1dp"
+                android:layout_weight="1"
+                android:background="@drawable/main_activity_button"
+                android:text="Start Recording"
+                android:textColor="@color/white"
+                android:visibility="visible" />
+
+            <Button
                 android:id="@+id/audio_routes"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -52,36 +64,61 @@
                 android:textColor="@android:color/white"
                 android:visibility="visible" />
 
+            <Button
+                android:id="@+id/toggle_video"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_margin="1dp"
+                android:layout_weight="1"
+                android:background="@drawable/main_activity_button"
+                android:text="toggle Video"
+                android:textColor="@android:color/white"
+                android:visibility="visible" />
+
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/join_conf_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
+            android:orientation="vertical"
             android:visibility="gone">
 
-            <EditText
-                android:id="@+id/conference_editext"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="3"
-                android:hint="Conference id"
-                android:imeOptions="actionDone"
-                android:maxLines="1"
-                android:textColor="@color/colorPrimary"
-                android:textColorHint="@color/colorPrimary" />
-
-            <Button
-                android:id="@+id/join"
-                android:layout_width="0dp"
+            <ListView
+                android:id="@+id/recorded_conf_list"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_weight="1"
-                android:background="@drawable/main_activity_button"
-                android:text="Join"
-                android:textColor="@android:color/white"
-                android:visibility="visible" />
+                android:layout_marginBottom="20dp"
+                android:visibility="gone" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <EditText
+                    android:id="@+id/conference_editext"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="3"
+                    android:hint="Conference id"
+                    android:imeOptions="actionDone"
+                    android:maxLines="1"
+                    android:textColor="@color/colorPrimary"
+                    android:textColorHint="@color/colorPrimary" />
+
+                <Button
+                    android:id="@+id/join"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_weight="1"
+                    android:background="@drawable/main_activity_button"
+                    android:text="Join"
+                    android:textColor="@android:color/white"
+                    android:visibility="visible" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
@@ -109,9 +146,9 @@
                 android:layout_weight="3"
                 android:hint="Broadcast message"
                 android:imeOptions="actionDone"
+                android:maxLines="1"
                 android:textColor="@color/colorPrimary"
-                android:textColorHint="@color/colorPrimary"
-                android:maxLines="1" />
+                android:textColorHint="@color/colorPrimary" />
 
             <Button
                 android:id="@+id/send_broadcast"
@@ -133,7 +170,7 @@
 
     </LinearLayout>
 
-    <fr.voxeet.sdk.sample.ScreenShareView
+    <voxeet.com.sdk.views.VideoView
         android:id="@+id/screen_share"
         android:layout_width="@dimen/screen_preview_width"
         android:layout_height="@dimen/screen_preview_height"
@@ -141,7 +178,7 @@
         android:padding="5dp"
         android:visibility="gone" />
 
-    <fr.voxeet.sdk.sample.ScreenShareView
+    <voxeet.com.sdk.views.VideoView
         android:id="@+id/video_stream"
         android:layout_width="75dp"
         android:layout_height="60dp"
