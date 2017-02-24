@@ -7,16 +7,20 @@ The SDK is a Java library allowing users to:
   - Change sounds angle and direction for each conference user
   - Broadcast messages to other participants
   - Mute users/conferences
+  - Enable/disable camera
+  - Screen share
+  - Record conferences
+  - Replayed recorded conferences
   - If you use External login like O365, LDAP, or custom login to retrieve contact details, it is now possible to also add your contact ID with the display name and the photo url avatar.
     This allows you to ask guest users to introduce themselves and provide their display name and for your authenticated users in your enterprise or for your clients the ID that can be retrieved from O365 (name, department, etc).
 
 ### Installing the Android SDK using Gradle
 
-To install the SDK directly into your Android project using the Grade build system and an IDE like Android Studio, add the following entry: "compile 'com.voxeet.sdk:core:0.7.796'" to your build.gradle file as shown below:
+To install the SDK directly into your Android project using the Grade build system and an IDE like Android Studio, add the following entry: "compile 'com.voxeet.sdk:core:0.8.000'" to your build.gradle file as shown below:
 
 ```java
 dependencies {
-    compile 'com.voxeet.sdk:core:0.7.796'
+    compile 'com.voxeet.sdk:core:0.8.000'
 }
 ```
 ### Recommended settings for API compatibility:
@@ -99,6 +103,7 @@ VoxeetSdk.createSdkConference();
 
 ```java
 // Used to join someone's conference otherwise joining is automatic
+// Joining a non-existing conference will create it
 VoxeetSdk.joinSdkConference(String conferenceId);
 ```
 
@@ -106,6 +111,26 @@ VoxeetSdk.joinSdkConference(String conferenceId);
 
 ```java
 VoxeetSdk.leaveSdkConference();
+```
+
+### Toggling own video
+
+```java
+// if successful, a ConferenceUserUpdatedEvent will be posted with the mediastream updated
+VoxeetSdk.toggleSdkVideo();
+```
+
+### Enabling/disabling conference recording
+
+```java
+// if successful, a RecordingStatusUpdateEvent will be posted with the updated recording conference status
+VoxeetSdk.toggleSdkRecording();
+```
+
+### Replaying a recorded conference
+
+```java
+VoxeetSdk.replaySdkConference(String conferenceId);
 ```
 
 ### Checking if a conference is live  
@@ -129,7 +154,7 @@ VoxeetSdk.changePeerPosition(String userId, double x, double y);
 VoxeetSdk.sendSdkBroadcast(String message);
 ```
 
-### Knowing if a conference is live
+### Figure out if a conference is live
 
 ```java
 VoxeetSdk.isSdkConferenceLive();
@@ -138,7 +163,7 @@ VoxeetSdk.isSdkConferenceLive();
 ### Getting current conference users
 
 ```java
-VoxeetSdk.getConferenceUsers();
+VoxeetSdk.getSdkConferenceUsers();
 ```
 
 ### Getting microphone state
@@ -189,6 +214,7 @@ VoxeetSdk.setSdkoutputRoute(AudioRoute route);
 
 ```java
 // Susbcribe to the SDK events
+// Mandatory
 VoxeetSdk.register(Context context);
 ```
 
@@ -196,17 +222,13 @@ VoxeetSdk.register(Context context);
 
 ```java
 // Unsusbcribe from the SDK events
+// Mandatory
 VoxeetSdk.unregister(Context context);
 ```
 
-### Registering the media stream listener
-
-```java
-// Get notified when streams are added/removed
-VoxeetSdk.setMediaSdkStreamListener(Media.MediaStreamListener listener);
-```
-
 ### Attaching the media stream
+
+It is advised to use the VideoView object available in the SDK.
 
 ```java
 // Attach the renderer to the media so we can get the rendering working
@@ -215,12 +237,21 @@ VoxeetSdk.attachMediaSdkStream(String peerId, MediaStream stream, VideoRenderer.
 
 ### Unattaching the media stream
 
+It is advised to use the VideoView object available in the SDK.
+
 ```java
-// Unattach the renderers to the media to avoid leaks
+// Unattach the renderers to avoid leaks
 VoxeetSdk.unAttachMediaSdkStream(String peerId, MediaStream stream);
 ```
 
-### Setting up the Video capturer
+### OBSOLETE - Registering the media stream listener
+
+```java
+// Get notified when streams are added/removed
+VoxeetSdk.setMediaSdkStreamListener(Media.MediaStreamListener listener);
+```
+
+### OBSOLETE - Setting up the Video capturer
 
 ```java
 //Init the video capturer in the onCreate of your activity.
@@ -232,12 +263,13 @@ VoxeetSdk.setSdkVideoCapturer(VideoCapturer capturer);
 
 ## SDK Initialization
 
-Initialize the SDK in the onCreate() method of your application class:
+Initialize the SDK in the onCreate() method of your custom application class:
 
 ```java
 @Override
 public void onCreate() {
     super.onCreate();
+    
     VoxeetSdk.sdkInitialize(this, consumerKey, consumerSecret);
 }
 ```
@@ -249,20 +281,10 @@ In order to work properly, it is necessary to register and unregister the SDK re
 ```java
 @Override
 
-private Media.MediaStreamListener listener; // needs to be initialized
-
 protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    
+        
     VoxeetSdk.register(this);
-    
-    //Init the video capturer in the onCreate of your activity.
-    VideoCapturer capturer = VideoCapturerAndroid.create(CameraEnumerationAndroid.getNameOfFrontFacingDevice(), null);
-
-    // Use to retrieved the front camera stream
-    VoxeetSdk.setSdkVideoCapturer(VideoCapturer capturer);
-    
-    VoxeetSdk.setMediaSdkStreamListener(listener);
 }
 
 @Override
@@ -275,34 +297,7 @@ protected void onDestroy() {
 
 ## Media Stream Listener
 
-The media stream listener is a set of callbacks used to let you know when video streams & screen share streams are added / removed. 
-
-```java
-private Media.MediaStreamListener mediaStreamListener = new Media.MediaStreamListener() {
-                
-        @Override
-        public void onStreamAdded(String peer, MediaStream stream) {
-          // use VoxeetSdk.attachMediaSdkStream(peer, stream, yourRenderer);
-        }
-
-        @Override
-        public void onStreamRemoved(String peer) {
-          // use VoxeetSdk.unAttachMediaSdkStream(peer, stream);
-        }
-
-        @Override
-        public void onScreenStreamAdded(final String peer, final MediaStream stream) {
-          // use VoxeetSdk.attachMediaSdkStream(peer, stream, yourRenderer);
-        }
-
-        @Override
-        public void onScreenStreamRemoved(String peer) {
-          // use VoxeetSdk.unAttachMediaSdkStream(peer, stream);
-        }
-    };
-    
-    NB: yourRenderer can be a custom object like the VideoView or the ScreenShareView included in the sample.
-```
+As of the latest version of the sdk (0.8.000), the media stream listener is implemented in the sdk and it is no longer required to implement it in your activity / fragment.
 
 ## ConferenceUser Model
 
@@ -316,8 +311,23 @@ public UserInfo getUserInfo();
 
 The SDK will dispatch events to the suscribed classes such as activities and fragments holding the conferences. To get notified, the only necessary step is to add those methods below:
 
+### Conference creation success
 
-### Conference joined
+```java
+@Subscribe
+public void onEvent(final ConferenceCreationSuccess event) {
+}
+```
+
+### Conference creation error
+
+```java
+@Subscribe
+public void onEvent(final ConferenceCreatedError event) {
+}
+```
+
+### Conference joined successfully
 
 ```java
 @Subscribe
@@ -325,6 +335,7 @@ public void onEvent(final ConferenceJoinedSuccessEvent event) {
     // Action to be called when joining successfully the conference
 }
 ```
+
 ### Conference joined error
 
 ```java
@@ -334,7 +345,7 @@ public void onEvent(final ConferenceJoinedError event) {
 }
 ```
 
-### Conference left
+### Conference left success
 
 ```java
 @Subscribe
@@ -352,19 +363,60 @@ public void onEvent(final ConferenceLeftError event) {
 }
 ```
 
-### Participant added
+### Conference ended
+
 ```java
 @Subscribe
-public void onEvent(final ConferenceUserJoinedEvent event) {
+public void onEvent(final ConferenceEnded event) {
+    // Action to be called when a conference has ended (typically a replay ending)
+}
+```
+
+### Conference user joined
+```java
+@Subscribe
+public void onEvent(final ConferenceUserJoinedEvent event) { 
     // Action to be called when a new participant joins the conference
 }
 ```
 
-### Participant status updated
+### Conference user updated
 ```java
 @Subscribe
-public void onEvent(final ConferenceUserUpdateEvent event) {
-    // Action to be called when a participant has left for example
+public void onEvent(final ConferenceUserUpdatedEvent event) {
+    // Action to be called when a participant has been updated (e.g conference user's camera has been turned on/off)
+}
+```
+
+### Conference user left
+```java
+@Subscribe
+public void onEvent(final ConferenceUserLeftEvent event) {
+    // Action to be called when a participant has left (e.g unattaching mediastream if needed)
+}
+```
+
+### Screen stream added
+```java
+@Subscribe
+public void onEvent(final ScreenStreamAddedEvent event) {
+    // Action to be called when a screen share stream is available
+}
+```
+
+### Screen stream removed
+```java
+@Subscribe
+public void onEvent(final ScreenStreamRemovedEvent event) {
+    // Action to be called when a screen share stream is no longer available
+}
+```
+
+### Recording conference status updated
+```java
+@Subscribe
+public void onEvent(final RecordingStatusUpdateEvent event) {
+    // Action to be called when the recording status has changed (RECORDING or NOT_RECORDING)
 }
 ```
 
@@ -376,12 +428,30 @@ public void onEvent(MessageReceived event) {
 }
 ```
 
+## MediaStream
+
+Present in the ConferenceUserJoinedEvent and ConferenceUserUpdatedEvent, this object is supposed to be attached/unattached from a renderer to display/hide a conference user video or screen share. 
+It has a boolean flag called hasVideo set to true if the user associated with it is currently streaming his camera/screen. Set to false, it means the user is not streaming or has stopped streaming his camera/screen.
+
+## Voxeet UI toolkit
+
+A few UI objects are available such as the VideoView made to ease up the use of mediastreams and such. Many more will be made available soon. 
+
+```java
+// Attach the renderer to the media so we can get the rendering working
+public void attach(String peerId, MediaStream stream);
+```
+
+```java
+public void unAttach();
+```
+
 ## Best practice regarding conferences
 
 Only one instance of a conference is allowed to be live. Leaving the current conference before creating or joining another one is mandatory. Otherwise, a IllegalStateException will be thrown.
 
 ## Version
-0.7.796
+0.8.000
 
 ## Tech
 
@@ -390,17 +460,25 @@ The Voxeet Android SDK uses a number of open source projects to work properly:
 * [Retrofit2] - A type-safe HTTP client for Android and Java.
 * [GreenRobot/EventBus] - Android optimized event bus.
 * [Jackson] - Jackson is a suite of data-processing tools for Java.
+* [Butterknife] - Bind Android views and callbacks to fields and methods.
+* [Picasso] - A powerful image downloading and caching library for Android.
+* [Recyclerview] - An android support library.
+* [Apache Commons] - Collection of open source reusable Java components from the Apache/Jakarta community.
 * [RxAndroid] - RxJava is a Java VM implementation of Reactive Extensions: a library for composing asynchronous and event-based programs by using observable sequences.
 
 ## Sample Application
 
 A sample application is available on this [public repository][sample] on GitHub.
 
-© Voxeet, 2016
+© Voxeet, 2017
 
    [Official Android Documentation]: <http://developer.android.com/training/permissions/requesting.html>
    [sample]: <https://github.com/voxeet/android-sdk-sample.git>
    [GreenRobot/EventBus]: <https://github.com/greenrobot/EventBus>
    [Jackson]: <https://github.com/FasterXML/jackson>
+   [Picasso]: <http://square.github.io/picasso>
+   [Recyclerview]: <https://developer.android.com/reference/android/support/v7/widget/RecyclerView.html>
+   [Butterknife]: <http://jakewharton.github.io/butterknife>
+   [Apache Commons]: <https://commons.apache.org>
    [RxAndroid]: <https://github.com/ReactiveX/RxAndroid>
    [Retrofit2]: <http://square.github.io/retrofit/>
