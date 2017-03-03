@@ -96,7 +96,7 @@ VoxeetSdk.enableOverlay(true);
 ```
 
 ### Enabling / Disabling the Voxeet overlay
-Enable a view (VoxeetConferenceView) on top of your current view when joining/creating a conference and will allow you to manage the current conference easily and in a stylish fashion. It regroups many objects from the Voxeet UI toolkit.
+Enables a view (VoxeetConferenceView) on top of your current view when joining/creating a conference and will allow you to manage the current conference easily and in a stylish fashion. It regroups many objects from the Voxeet UI toolkit. Can be turned on/off at any point in time.
 
 ```java
 VoxeetSdk.enableOverlay(boolean enable);
