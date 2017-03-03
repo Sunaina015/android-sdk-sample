@@ -122,8 +122,6 @@ public class CreateConfActivity extends AppCompatActivity {
 
     private Handler handler;
 
-    private boolean isInit;
-
     @Nullable
     private ProgressDialog dialog = null;
 
@@ -195,11 +193,7 @@ public class CreateConfActivity extends AppCompatActivity {
 
     @OnClick(R.id.join)
     public void join() {
-        if (!isInit) {
-            isInit = true;
-
-            VoxeetSdk.register(CreateConfActivity.this);
-        }
+        VoxeetSdk.register(this, this);
 
         if (action == MainActivity.JOIN)
             VoxeetSdk.joinSdkConference(editextConference.getText().toString());
@@ -271,9 +265,7 @@ public class CreateConfActivity extends AppCompatActivity {
             VoxeetSdk.createSdkConference();
         }
 
-        isInit = true;
-
-        VoxeetSdk.register(this);
+        VoxeetSdk.register(this, this);
     }
 
     private void displayJoin() {
