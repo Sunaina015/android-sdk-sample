@@ -16,11 +16,11 @@ The SDK is a Java library allowing users to:
 
 ### Installing the Android SDK using Gradle
 
-To install the SDK directly into your Android project using the Grade build system and an IDE like Android Studio, add the following entry: "compile 'com.voxeet.sdk:core:0.8.000'" to your build.gradle file as shown below:
+To install the SDK directly into your Android project using the Grade build system and an IDE like Android Studio, add the following entry: "compile 'com.voxeet.sdk:core:0.8.001'" to your build.gradle file as shown below:
 
 ```java
 dependencies {
-    compile 'com.voxeet.sdk:core:0.8.000'
+    compile 'com.voxeet.sdk:core:0.8.001'
 }
 ```
 ### Recommended settings for API compatibility:
@@ -84,7 +84,22 @@ Add your consumer key & secret to the xml string file of your application.
 
 ```java
 // To be called from the application class
-VoxeetSdk.sdkInitialize(Context context, String consumerKey, String consumerSecret, null);
+
+// if you have external info
+UserInfo externalInfo = new UserInfo(externalName, externalName, externalPhotoUrl);
+
+// else
+UserInfo externalInfo = new UserInfo();
+
+VoxeetSdk.sdkInitialize(Context context, String consumerKey, String consumerSecret, externalInfo));
+VoxeetSdk.enableOverlay(true);
+```
+
+### Enabling / Disabling the Voxeet overlay
+Enable a view (VoxeetConferenceView) on top of your current view when joining/creating a conference and will allow you to manage the current conference easily and in a stylish fashion. It regroups many objects from the Voxeet UI toolkit.
+
+```java
+VoxeetSdk.enableOverlay(boolean enable);
 ```
 
 ### Creating a demo conference  
@@ -185,7 +200,7 @@ VoxeetSdk.muteSdkConference(boolean mute);
 VoxeetSdk.muteSdkUser(String userId, boolean mute);
 ```
 
-### Checking if a user is muted
+### Checking if an user is muted
 
 ```java
 VoxeetSdk.isSdkUserMuted(String userId);
@@ -212,13 +227,19 @@ VoxeetSdk.setSdkoutputRoute(AudioRoute route);
 
 ### Registering the SDK
 
+Registering is mandatory before starting a conference or else it will crash. Since version 0.8.001, the context and the object subscribing to receive the conference events are now decoupled offering more flexibility.
+
 ```java
-// Susbcribe to the SDK events
-// Mandatory
+// Deprecated
 VoxeetSdk.register(Context context);
+
+// Susbcribe to the SDK events
+VoxeetSdk.register(Context context, Object subscriber);
 ```
 
 ### Unregistering the SDK
+
+It's important to use this method once the conference is ended and that you want to finish your current view/activiy/ fragment.
 
 ```java
 // Unsusbcribe from the SDK events
@@ -228,7 +249,7 @@ VoxeetSdk.unregister(Context context);
 
 ### Attaching the media stream
 
-It is advised to use the VideoView object available in the SDK.
+It is advised to use the VideoView object available in the SDK. Check the part about the Voxeet UI Toolkit below.
 
 ```java
 // Attach the renderer to the media so we can get the rendering working
@@ -268,7 +289,14 @@ Initialize the SDK in the onCreate() method of your custom application class:
 public void onCreate() {
     super.onCreate();
     
-    VoxeetSdk.sdkInitialize(this, consumerKey, consumerSecret);
+    // if you have external info
+    UserInfo externalInfo = new UserInfo(externalName, externalName, externalPhotoUrl);
+
+    // else
+    UserInfo externalInfo = new UserInfo();
+    
+    VoxeetSdk.sdkInitialize(this, consumerKey, consumerSecret, externalInfo);
+    VoxeetSdk.enableOverlay(boolean enabled);
 }
 ```
 
@@ -282,7 +310,7 @@ In order to work properly, it is necessary to register and unregister the SDK re
 protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
         
-    VoxeetSdk.register(this);
+    VoxeetSdk.register(getApplicationContext(), this);
 }
 
 @Override
@@ -299,7 +327,7 @@ As of the latest version of the sdk (0.8.000), the media stream listener is impl
 
 ## ConferenceUser Model
 
-ConferenceUser model now has an userInfo object where infos are stored such as the external user id, the url avatar and display name.
+ConferenceUser model now has an userInfo object where infos are stored such as the external user id, the url avatar and display name. It has to be passed when initializing the sdk in the application class.
 
 ```java
 public UserInfo getUserInfo();
@@ -428,12 +456,30 @@ public void onEvent(MessageReceived event) {
 
 ## MediaStream
 
-Present in the ConferenceUserJoinedEvent and ConferenceUserUpdatedEvent, this object is supposed to be attached/unattached from a renderer to display/hide a conference user video or screen share. 
+Present in the ConferenceUserJoinedEvent and ConferenceUserUpdatedEvent, this object is supposed to be attached/unattached from a renderer to display/hide a conference user video or screen share stream. 
 It has a boolean flag called hasVideo set to true if the user associated with it is currently streaming his camera/screen. Set to false, it means the user is not streaming or has stopped streaming his camera/screen.
 
 ## Voxeet UI toolkit
 
-A few UI objects are available such as the VideoView made to ease up the use of mediastreams and such. Many more will be made available soon. 
+A few UI objects are available such as the VideoView made to ease up the use of mediastreams and many others. All of them have customizable attributes you can use programmaticaly or in the xml. Here is a comprehensive list:
+
+### VoxeetConferenceView
+
+This view regroups all of the others custom components available. We will now go into further details about each one of them.
+
+### VoxeetTimer
+
+It displays a timer for the conference which starts when you join the conference. Also shows a green light which turns to red when the conference is being recorded.
+
+```java
+<attr name="recording_color" format="color" />
+<attr name="default_color" format="color" />
+<attr name="text_color" format="color" />
+```
+
+### VoxeetRenderer
+
+This is the component used to display someone's stream. Two main methods are available to attach and unattach the different streams: 
 
 ```java
 // Attach the renderer to the media so we can get the rendering working
@@ -444,12 +490,73 @@ public void attach(String peerId, MediaStream stream);
 public void unAttach();
 ```
 
+### VoxeetCurrentSpeakerView
+
+Displays the current speaker with it's avatar picture and a scaling circle representating it's current voice level.
+
+```java
+<attr name="vu_meter_color" format="color" />
+```
+
+### VoxeetVuMeter
+
+It's a part of the VoxeetCurrentSpeakerView mentionned above but can definitely work on it's own.
+
+```java
+<attr name="background_color" format="color" />
+```
+
+## VoxeetConferenceBarView
+
+Contains differents buttons allowing you to manage the conference. Here are the different options: 
+- toggle own camera
+- leave conference
+- mute 
+- change audio output
+- toggle conference recording
+
+```java
+<attr name="record_button" format="boolean" />
+<attr name="audio_button" format="boolean" />
+<attr name="mute_button" format="boolean" />
+<attr name="video_button" format="boolean" />
+<attr name="leave_button" format="boolean" />
+```
+
+## VoxeetParticipantView
+
+The participant view shows the current conference's participants. Also displays the users' cams when they are enabled. You can set a listener so you get notified when a participant is selected/unselected. This allows interactions with others views. You can check the VoxeetConferenceView which locks the currentSpeakerView when someone is selected.
+
+```java
+public void setParticipantListener(ParticipantViewListener listener)
+```
+
+```java
+<attr name="overlay_color" format="color" />
+```
+
+## Conference event flow
+
+1. ConferenceCreatedEvent (if you're the one creating the conference, joining it is automatic)
+
+2. ConferenceJoinedSuccessEvent or ConferenceJoinedErrorEvent after joining it 
+  
+3.  a. ConferenceUserJoinedEvent when someone joins the conf
+    b. ConferenceUserUpdatedEvent when someone starts/stop streaming
+    c. ConferenceUserLeftEvent when someone left
+    
+4. ConferenceLeftSuccessEvent or ConferenceLeftErrorEvent after leaving the conference
+
+5. ConferenceEndedEvent if a conference has ended such a replay ending
+
+6. ConferenceDestroyedEvent when the conference is destroyed
+
 ## Best practice regarding conferences
 
 Only one instance of a conference is allowed to be live. Leaving the current conference before creating or joining another one is mandatory. Otherwise, a IllegalStateException will be thrown.
 
 ## Version
-0.8.000
+0.8.001
 
 ## Tech
 
