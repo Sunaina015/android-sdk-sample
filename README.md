@@ -291,7 +291,6 @@ public void onCreate() {
     
     // if you have external info
     UserInfo externalInfo = new UserInfo(externalName, externalName, externalPhotoUrl);
-
     // else
     UserInfo externalInfo = new UserInfo();
     
@@ -542,7 +541,9 @@ public void setParticipantListener(ParticipantViewListener listener)
 2. ConferenceJoinedSuccessEvent or ConferenceJoinedErrorEvent after joining it 
   
 3.  a. ConferenceUserJoinedEvent when someone joins the conf
+
     b. ConferenceUserUpdatedEvent when someone starts/stop streaming
+    
     c. ConferenceUserLeftEvent when someone left
     
 4. ConferenceLeftSuccessEvent or ConferenceLeftErrorEvent after leaving the conference
