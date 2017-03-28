@@ -16,11 +16,14 @@ The SDK is a Java library allowing users to:
 
 ### Installing the Android SDK using Gradle
 
-To install the SDK directly into your Android project using the Grade build system and an IDE like Android Studio, add the following entry: "compile 'com.voxeet.sdk:core:0.8.002'" to your build.gradle file as shown below:
+To install the SDK directly into your Android project using the Grade build system and an IDE like Android Studio, add the following entry: "compile 'com.voxeet.sdk:core:0.8.007'" to your build.gradle file as shown below:
 
 ```java
 dependencies {
-    compile 'com.voxeet.sdk:core:0.8.002'
+    compile 'com.voxeet.sdk.android:core:0.8.007'
+    
+    //add this one aswell if you want to use the voxeet ui toolkit
+    compile 'com.voxeet.sdk.android:toolkit:1.0.011'
 }
 ```
 ### Recommended settings for API compatibility:
@@ -91,15 +94,18 @@ UserInfo externalInfo = new UserInfo(externalName, externalName, externalPhotoUr
 // else
 UserInfo externalInfo = new UserInfo();
 
-VoxeetSdk.sdkInitialize(Context context, String consumerKey, String consumerSecret, externalInfo));
-VoxeetSdk.enableOverlay(true);
+VoxeetSdk.sdkInitialize(this, consumerKey, consumerSecret, externalInfo);
+
+// requires the voxeet toolkit lib in the gradle app file
+VoxeetToolkit.initialize(this);
+VoxeetToolkit.enableOverlay(true);
 ```
 
 ### Enabling / Disabling the Voxeet overlay
 Enables a view (VoxeetConferenceView) on top of your current view when joining/creating a conference and will allow you to manage the current conference easily and in a stylish fashion. It regroups many objects from the Voxeet UI toolkit. Can be turned on/off at any point in time.
 
 ```java
-VoxeetSdk.enableOverlay(boolean enable);
+VoxeetToolkit.enableOverlay(boolean enable);
 ```
 
 ### Creating a demo conference  
@@ -573,7 +579,8 @@ public void setParticipantListener(ParticipantViewListener listener)
 Only one instance of a conference is allowed to be live. Leaving the current conference before creating or joining another one is mandatory. Otherwise, a IllegalStateException will be thrown.
 
 ## Version
-0.8.002
+core: 0.8.007
+toolkit: 1.0.011
 
 ## Tech
 
