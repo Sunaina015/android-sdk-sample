@@ -22,6 +22,7 @@ To install the SDK directly into your Android project using the Grade build syst
 dependencies {
     compile 'com.voxeet.sdk.android:core:0.8.007'
     
+    
     //add this one aswell if you want to use the voxeet ui toolkit
     compile 'com.voxeet.sdk.android:toolkit:1.0.011'
 }
@@ -580,6 +581,7 @@ Only one instance of a conference is allowed to be live. Leaving the current con
 
 ## Version
 core: 0.8.007
+
 toolkit: 1.0.011
 
 ## Tech
