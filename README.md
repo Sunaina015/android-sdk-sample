@@ -473,7 +473,9 @@ It displays a timer for the conference which starts when you join the conference
 ```java
 <attr name="recording_color" format="color" />
 <attr name="default_color" format="color" />
+<attr name="not_in_conference_color" format="color" />
 <attr name="text_color" format="color" />
+<attr name="timer_mode" format="integer" />
 ```
 
 ### VoxeetRenderer
@@ -487,6 +489,18 @@ public void attach(String peerId, MediaStream stream);
 
 ```java
 public void unAttach();
+```
+
+### VoxeetIncomingCallButton
+
+Press and swipe out type of button used to answer/decline a call for example. Callback listener will be triggered if set when the swipe has reached the minimum distance.
+
+```java
+public void setIncomingCallListener(IncomingCallListener listener)
+```
+
+```java
+<attr name="view_src" format="integer" />
 ```
 
 ### VoxeetCurrentSpeakerView
@@ -532,6 +546,8 @@ public void setParticipantListener(ParticipantViewListener listener)
 
 ```java
 <attr name="overlay_color" format="color" />
+<attr name="name_enabled" format="boolean" />
+<attr name="display_self" format="boolean" />
 ```
 
 ## Conference event flow
