@@ -63,11 +63,25 @@ Add the following permissions to your Android Manifest file:
 
 In order to target Android API level 23 or later, you will need to ensure that your application requests runtime permissions for microphone and camera access. To do this, perform the following step:
 
-Request microphone permissions from within your activity :
+Request microphone and camera permissions from within your activity/fragment :
 
 ```java
 ActivityCompat.requestPermissions(this,
     new String[]{Manifest.permission.RECORD_AUDIO}, MIC_PERMISSION_REQUEST_CODE);
+}
+```
+
+```java
+ActivityCompat.requestPermissions(this,
+    new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_REQUEST_CODE);
+}
+```
+
+You can also request both at the same time: 
+
+```java
+ActivityCompat.requestPermissions(this,
+    new String[]{Manifest.permission.RECORD_AUDIO, Manifest.permission.CAMERA}, PERMISSION_REQUEST_CODE);
 }
 ```
 
