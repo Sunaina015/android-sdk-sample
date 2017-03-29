@@ -528,12 +528,57 @@ It's a part of the VoxeetCurrentSpeakerView mentionned above but can definitely 
 
 ## VoxeetConferenceBarView
 
-Contains differents buttons allowing you to manage the conference. Here are the different options: 
+Contains differents buttons allowing you to manage the conference. Here are the different available buttons: 
 - toggle own camera
 - leave conference
 - mute 
 - change audio output
 - toggle conference recording
+
+All of them are supposed to have a default state as well as a selected state. Since (1.0.012) you can set your own drawables to the conference bar's buttons through the xml or by using one the following methods: 
+
+```java
+public void setCameraSelector(Drawable drawable);
+
+public void setCameraSelector(int cameraSelector);
+
+public void setRecordSelector(Drawable drawable);
+public void setRecordSelector(int recordSelector);
+
+public void setHangUpSelector(Drawable drawable);
+public void setHangUpSelector(int hangUpSelector);
+
+public void setAudioSelector(Drawable drawable);
+public void setAudioSelector(int audioSelector);
+
+public void setMuteSelector(Drawable drawable);
+public void setMuteSelector(int muteSelector);
+```
+
+
+```java
+// set your own selector to each button
+<attr name="mute_selector" format="integer" />
+<attr name="audio_selector" format="integer" />
+<attr name="hang_up_selector" format="integer" />
+<attr name="camera_selector" format="integer" />
+<attr name="record_selector" format="integer" />
+```
+
+
+To hide/make visible buttons, here are the different methods: 
+
+```java
+public void setDisplayRecord(boolean displayRecord);
+
+public void setDisplayAudio(boolean displayAudio);
+
+public void setDisplayMute(boolean displayMute);
+
+public void setDisplayCamera(boolean displayCamera);
+    
+public void setDisplayLeave(boolean displayLeave);
+```
 
 ```java
 <attr name="record_button" format="boolean" />
@@ -555,6 +600,14 @@ public void setParticipantListener(ParticipantViewListener listener)
 <attr name="overlay_color" format="color" />
 <attr name="name_enabled" format="boolean" />
 <attr name="display_self" format="boolean" />
+```
+
+## VoxeetLoadingView
+
+A custom view designed to display an ongoing task like an outgoing/incoming call.
+
+```java
+<attr name="loading_color" format="color" />
 ```
 
 ## Conference event flow
