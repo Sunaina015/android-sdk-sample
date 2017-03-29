@@ -10,9 +10,9 @@ The SDK is a Java library allowing users to:
   - Enable/disable camera
   - Screen share
   - Record conferences
-  - Replayed recorded conferences
+  - Replay recorded conferences
   - If you use External login like O365, LDAP, or custom login to retrieve contact details, it is now possible to also add your contact ID with the display name and the photo url avatar.
-    This allows you to ask guest users to introduce themselves and provide their display name and for your authenticated users in your enterprise or for your clients the ID that can be retrieved from O365 (name, department, etc).
+   This allows you to ask guest users to introduce themselves and provide their display name and for your authenticated users in your enterprise or for your clients the ID that can be retrieved from O365 (name, department, etc).
 
 ### Installing the Android SDK using Gradle
 
