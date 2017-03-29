@@ -528,18 +528,19 @@ It's a part of the VoxeetCurrentSpeakerView mentionned above but can definitely 
 
 ## VoxeetConferenceBarView
 
-Contains differents buttons allowing you to manage the conference. Here are the different available buttons: 
-- toggle own camera
-- leave conference
-- mute 
-- change audio output
-- toggle conference recording
+Contains different buttons allowing you to manage the conference. Here are the different available buttons: 
+
+  - toggle own camera
+  - leave conference
+  - mute 
+  - change audio output
+  - toggle conference recording
+  
 
 All of them are supposed to have a default state as well as a selected state. Since (1.0.012) you can set your own drawables to the conference bar's buttons through the xml or by using one the following methods: 
 
 ```java
 public void setCameraSelector(Drawable drawable);
-
 public void setCameraSelector(int cameraSelector);
 
 public void setRecordSelector(Drawable drawable);
