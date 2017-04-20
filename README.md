@@ -16,15 +16,15 @@ The SDK is a Java library allowing users to:
 
 ### Installing the Android SDK using Gradle
 
-To install the SDK directly into your Android project using the Grade build system and an IDE like Android Studio, add the following entry: "compile 'com.voxeet.sdk:core:0.8.007'" to your build.gradle file as shown below:
+To install the SDK directly into your Android project using the Grade build system and an IDE like Android Studio, add the following entry: "compile 'com.voxeet.sdk:core:0.8.011'" to your build.gradle file as shown below:
 
 ```java
 dependencies {
-    compile 'com.voxeet.sdk.android:core:0.8.007'
+    compile 'com.voxeet.sdk.android:core:0.8.011'
     
     
     //add this one aswell if you want to use the voxeet ui toolkit
-    compile 'com.voxeet.sdk.android:toolkit:1.0.011'
+    compile 'com.voxeet.sdk.android:toolkit:1.0.016'
 }
 ```
 ### Recommended settings for API compatibility:
@@ -343,7 +343,7 @@ protected void onDestroy() {
 
 ## Media Stream Listener
 
-As of the latest version of the sdk (0.8.000), the media stream listener is implemented in the sdk and it is no longer required to implement it in your activity / fragment.
+As of the latest version of the sdk (0.8.000+), the media stream listener is implemented in the sdk and it is no longer required to implement it in your activity / fragment.
 
 ## ConferenceUser Model
 
@@ -648,9 +648,9 @@ A custom view designed to display an ongoing task like an outgoing/incoming call
 Only one instance of a conference is allowed to be live. Leaving the current conference before creating or joining another one is mandatory. Otherwise, a IllegalStateException will be thrown.
 
 ## Version
-core: 0.8.007
+core: 0.8.011
 
-toolkit: 1.0.011
+toolkit: 1.0.016
 
 ## Tech
 
