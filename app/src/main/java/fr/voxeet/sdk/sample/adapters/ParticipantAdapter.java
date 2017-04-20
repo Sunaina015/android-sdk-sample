@@ -20,12 +20,12 @@ import java.util.List;
 import java.util.Map;
 
 import fr.voxeet.sdk.sample.R;
+import sdk.voxeet.com.toolkit.views.uitookit.RoundedImageView;
+import sdk.voxeet.com.toolkit.views.uitookit.VideoView;
 import voxeet.com.sdk.core.VoxeetSdk;
 import voxeet.com.sdk.json.UserInfo;
 import voxeet.com.sdk.models.abs.ConferenceUser;
 import voxeet.com.sdk.models.impl.DefaultConferenceUser;
-import voxeet.com.sdk.views.RoundedImageView;
-import voxeet.com.sdk.views.VideoView;
 
 /**
  * Created by RomainB on 4/21/16.

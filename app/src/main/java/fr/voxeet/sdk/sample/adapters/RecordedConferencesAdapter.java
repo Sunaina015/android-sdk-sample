@@ -5,29 +5,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
-import com.squareup.picasso.Picasso;
-import com.voxeet.android.media.MediaStream;
-
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import fr.voxeet.sdk.sample.R;
 import fr.voxeet.sdk.sample.Recording;
-import voxeet.com.sdk.core.VoxeetSdk;
-import voxeet.com.sdk.json.UserInfo;
-import voxeet.com.sdk.models.abs.ConferenceUser;
-import voxeet.com.sdk.models.impl.DefaultConferenceUser;
-import voxeet.com.sdk.views.RoundedImageView;
-import voxeet.com.sdk.views.VideoView;
 
 /**
  * Created by RomainB on 4/21/16.

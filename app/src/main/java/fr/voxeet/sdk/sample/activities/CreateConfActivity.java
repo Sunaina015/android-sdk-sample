@@ -16,7 +16,6 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -40,9 +39,9 @@ import fr.voxeet.sdk.sample.adapters.ParticipantAdapter;
 import fr.voxeet.sdk.sample.adapters.RecordedConferencesAdapter;
 import fr.voxeet.sdk.sample.application.SampleApplication;
 import fr.voxeet.sdk.sample.dialogs.ConferenceOutput;
+import sdk.voxeet.com.toolkit.views.uitookit.VideoView;
 import voxeet.com.sdk.core.VoxeetPreferences;
 import voxeet.com.sdk.core.VoxeetSdk;
-import voxeet.com.sdk.events.success.ConferenceEndedEvent;
 import voxeet.com.sdk.events.success.ConferenceJoinedSuccessEvent;
 import voxeet.com.sdk.events.success.ConferenceLeftSuccessEvent;
 import voxeet.com.sdk.events.success.ConferenceUserJoinedEvent;
@@ -55,7 +54,6 @@ import voxeet.com.sdk.json.ConferenceEnded;
 import voxeet.com.sdk.json.RecordingStatusUpdateEvent;
 import voxeet.com.sdk.models.RecordingStatus;
 import voxeet.com.sdk.models.abs.ConferenceUser;
-import voxeet.com.sdk.views.VideoView;
 
 import static android.view.View.VISIBLE;
 

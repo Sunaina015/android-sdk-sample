@@ -1,4 +1,8 @@
 <resources>
+    <!--<string name="consumer_key">rrd</string>-->
+    <!--<string name="consumer_secret">voxeet</string>-->
+    <string name="consumer_key">NGZmcHUxYm5hYzNlYQ</string>
+    <string name="consumer_secret">NDJwaDkyZ2MwcHRvc25uMWlsdnA0ZDZlcmo</string>
     <string name="app_name">Github Voxeet Sample</string>
     <string name="action_settings">Settings</string>
     <string name="demo">Conference demo</string>

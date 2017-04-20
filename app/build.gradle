@@ -42,7 +42,8 @@ dependencies {
 //    compile project(path: ':media')
 
     compile 'com.android.support:multidex:1.0.1'
-    compile 'com.android.support:design:25.1.0'
+    compile 'com.android.support:design:25.3.0'
 
-    compile 'com.voxeet.sdk:core:0.8.002'
+    compile 'com.voxeet.sdk.android:core:0.8.010'
+    compile 'com.voxeet.sdk.android:toolkit:1.0.016'
 }
