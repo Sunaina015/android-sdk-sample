@@ -44,6 +44,6 @@ dependencies {
     compile 'com.android.support:multidex:1.0.1'
     compile 'com.android.support:design:25.3.0'
 
-    compile 'com.voxeet.sdk.android:core:0.8.010'
+    compile 'com.voxeet.sdk.android:core:0.8.011'
     compile 'com.voxeet.sdk.android:toolkit:1.0.016'
 }

@@ -25,6 +25,7 @@ import android.widget.Toast;
 import com.voxeet.android.media.MediaStream;
 
 import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.HashMap;
 import java.util.List;
@@ -272,9 +273,9 @@ public class CreateConfActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if (VoxeetSdk.isSdkConferenceLive())
-            displayLeaveDialog();
-        else
+//        if (VoxeetSdk.isSdkConferenceLive())
+//            displayLeaveDialog();
+//        else
             super.onBackPressed();
     }
 
@@ -322,74 +323,64 @@ public class CreateConfActivity extends AppCompatActivity {
         adapter.notifyDataSetChanged();
     }
 
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(final ConferenceJoinedSuccessEvent event) {
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                hideProgress();
+        hideProgress();
 
-                leave.setVisibility(VISIBLE);
+        leave.setVisibility(VISIBLE);
 
-                joinLayout.setVisibility(View.GONE);
+        joinLayout.setVisibility(View.GONE);
 
-                conferenceOptions.setVisibility(VISIBLE);
+        conferenceOptions.setVisibility(VISIBLE);
 
-                if (action == MainActivity.DEMO || action == MainActivity.REPLAY) {
-                    record.setVisibility(View.GONE);
-                    video.setVisibility(View.GONE);
-                } else {
-                    aliasId.setVisibility(VISIBLE);
-                    aliasId.setText(event.getAliasId() != null ? event.getAliasId() : event.getConferenceId());
+        if (action == MainActivity.DEMO || action == MainActivity.REPLAY) {
+            record.setVisibility(View.GONE);
+            video.setVisibility(View.GONE);
+        } else {
+            aliasId.setVisibility(VISIBLE);
+            aliasId.setText(event.getAliasId() != null ? event.getAliasId() : event.getConferenceId());
 
-                    sendText.setVisibility(VISIBLE);
-                }
-            }
-        });
+            sendText.setVisibility(VISIBLE);
+        }
     }
 
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(final ConferenceLeftSuccessEvent event) {
         onConferenceEnding();
     }
 
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(final ConferenceEnded event) {
         onConferenceEnding();
     }
 
     private void onConferenceEnding() {
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                VoxeetSdk.unregister(CreateConfActivity.this);
+        VoxeetSdk.unregister(CreateConfActivity.this);
 
-                screenShare.unAttach(); // unattaching just in case
+        screenShare.unAttach(); // unattaching just in case
 
-                videoStream.unAttach(); // unattaching just in case
+        videoStream.unAttach(); // unattaching just in case
 
-                finish();
-            }
-        });
+        finish();
     }
 
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(final ConferenceUserLeftEvent event) {
         adapter.removeParticipant(event.getUser());
         adapter.notifyDataSetChanged();
     }
 
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(final ConferenceUserJoinedEvent event) {
         updateStreams(event.getUser(), event.getMediaStream());
     }
 
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(final ConferenceUserUpdatedEvent event) {
         updateStreams(event.getUser(), event.getMediaStream());
     }
 
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(ScreenStreamAddedEvent event) {
         MediaStream mediaStream = event.getMediaStream();
         if (mediaStream != null && mediaStream.hasVideo()) { // attaching stream
@@ -398,7 +389,7 @@ public class CreateConfActivity extends AppCompatActivity {
         }
     }
 
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(RecordingStatusUpdateEvent event) {
         if (event.getRecordingStatus().equalsIgnoreCase(RecordingStatus.RECORDING.name())) {
             ((SampleApplication) getApplication()).saveRecordingConference(new Recording(event.getConferenceId(), event.getTimeStamp()));
@@ -409,13 +400,12 @@ public class CreateConfActivity extends AppCompatActivity {
         }
     }
 
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(ScreenStreamRemovedEvent event) { // unattaching stream
         screenShare.setVisibility(View.GONE);
         screenShare.unAttach();
     }
 
-    @Subscribe
     public void onEvent(MessageReceived event) {
         Log.e(TAG, event.getMessage());
     }
