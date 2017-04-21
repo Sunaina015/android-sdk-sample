@@ -46,6 +46,7 @@
         </activity>
         <activity
             android:name=".activities.CreateConfActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/create_conf" />
     </application>
 </manifest>

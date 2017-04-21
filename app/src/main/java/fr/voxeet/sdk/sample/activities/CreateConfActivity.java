@@ -276,7 +276,7 @@ public class CreateConfActivity extends AppCompatActivity {
 //        if (VoxeetSdk.isSdkConferenceLive())
 //            displayLeaveDialog();
 //        else
-            super.onBackPressed();
+        super.onBackPressed();
     }
 
     private void displayLeaveDialog() {
@@ -406,8 +406,9 @@ public class CreateConfActivity extends AppCompatActivity {
         screenShare.unAttach();
     }
 
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(MessageReceived event) {
-        Log.e(TAG, event.getMessage());
+        Toast.makeText(this, event.getMessage(), Toast.LENGTH_SHORT).show();
     }
 
     public void showProgress() {

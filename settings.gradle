@@ -1,7 +1,9 @@
 include ':app'
 
-//, ':core', ':media'
+//, ':core', ':media', ':toolkit'
+//
+//project(':media').projectDir = new File(settingsDir, "../sdk-media-sources/media")
 //
 //project(':core').projectDir = new File(settingsDir, "../android-sdk-core-sources/core")
 //
-//project(':media').projectDir = new File(settingsDir, "../sdk-media-sources/media")
+//project(':toolkit').projectDir = new File(settingsDir, "../android-sdk-core-sources/toolkit")
