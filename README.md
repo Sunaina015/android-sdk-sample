@@ -118,7 +118,7 @@ Add your consumer key & secret to the xml string file of your application.
 
 ### Logger
 
-A logger has been added to the SDK allowing users to tracks event more easily. 3 different level for 3 different types of informations:
+A logger has been added to the SDK allowing users to track events more easily. 3 different levels for 3 different types of informations:
 
   1. DEBUG for every event dispatched through the eventbus.
   2. INFO to display methods results when calling a SDK method.
