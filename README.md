@@ -16,15 +16,15 @@ The SDK is a Java library allowing users to:
 
 ### Installing the Android SDK using Gradle
 
-To install the SDK directly into your Android project using the Grade build system and an IDE like Android Studio, add the following entry: "compile 'com.voxeet.sdk:core:0.8.011'" to your build.gradle file as shown below:
+To install the SDK directly into your Android project using the Grade build system and an IDE like Android Studio, add the following entry: "compile 'com.voxeet.sdk:core:0.8.014'" to your build.gradle file as shown below:
 
 ```java
 dependencies {
-    compile 'com.voxeet.sdk.android:core:0.8.011'
+    compile 'com.voxeet.sdk.android:core:0.8.014'
     
     
     //add this one aswell if you want to use the voxeet ui toolkit
-    compile 'com.voxeet.sdk.android:toolkit:1.0.016'
+    compile 'com.voxeet.sdk.android:toolkit:1.0.022'
 }
 ```
 ### Recommended settings for API compatibility:
@@ -59,6 +59,21 @@ Add the following permissions to your Android Manifest file:
 
   // Used to change audio routes
   <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+```
+
+To enable Voxeet notifications (getting a new call, conference ended and so on...) on your applications, also add this to your Android Manifest : 
+
+```java
+    <service android:name="voxeet.com.sdk.firebase.VoxeetFirebaseMessagingService">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+        <service android:name="voxeet.com.sdk.firebase.VoxeetFirebaseInstanceIDService">
+            <intent-filter>
+                <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
+            </intent-filter>
+        </service>
 ```
 
 In order to target Android API level 23 or later, you will need to ensure that your application requests runtime permissions for microphone and camera access. To do this, perform the following step:
@@ -111,6 +126,9 @@ UserInfo externalInfo = new UserInfo();
 
 VoxeetSdk.sdkInitialize(this, consumerKey, consumerSecret, externalInfo);
 
+// Set Default activity to launch when receiving notifications if enabled
+VoxeetSdk.setDefaultActivity(YourIncomingCall.class.getCanonicalName());
+
 // requires the voxeet toolkit lib in the gradle app file
 VoxeetToolkit.initialize(this);
 VoxeetToolkit.enableOverlay(true);
@@ -135,12 +153,18 @@ VoxeetSdk.createSdkDemo();
 VoxeetSdk.createSdkConference();
 ```
 
-### Joining a conference  
+### Joining a conference
 
 ```java
 // Used to join someone's conference otherwise joining is automatic
 // Joining a non-existing conference will create it
 VoxeetSdk.joinSdkConference(String conferenceId);
+```
+
+### Joining a conference as a listener (no camera nor microphone)
+
+```java
+VoxeetSdk.listenConference(String conferenceId);
 ```
 
 ### Leaving a conference  
@@ -648,9 +672,9 @@ A custom view designed to display an ongoing task like an outgoing/incoming call
 Only one instance of a conference is allowed to be live. Leaving the current conference before creating or joining another one is mandatory. Otherwise, a IllegalStateException will be thrown.
 
 ## Version
-core: 0.8.011
+core: 0.8.014
 
-toolkit: 1.0.016
+toolkit: 1.0.022
 
 ## Tech
 
