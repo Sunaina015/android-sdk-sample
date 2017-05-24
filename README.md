@@ -61,7 +61,10 @@ Add the following permissions to your Android Manifest file:
   <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
 ```
 
-To enable Voxeet notifications (getting a new call, conference ended and so on...) on your applications, also add this to your Android Manifest : 
+To enable Voxeet notifications (getting a new call, conference ended and so on...) on your applications:
+  1. Send us the application fcm token
+  2. Add the google.json file to your project
+  2. Add this to your Android Manifest: 
 
 ```java
     <service android:name="voxeet.com.sdk.firebase.VoxeetFirebaseMessagingService">
