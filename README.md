@@ -114,6 +114,16 @@ Add your consumer key & secret to the xml string file of your application.
  <string name="consumer_secret">your consumer password</string>
 ```
 
+### Logger
+
+A logger has been added to the SDK allowing users to tracks event more easily. 3 different level for 3 different types of informations:
+
+  1. DEBUG for every event dispatched through the eventbus.
+  2. INFO to display methods results when calling a SDK method.
+  3. ERROR when an error occurs.
+  
+Please also note that WebRTC has its own logger for WebRTC related events.
+
 ## Available methods
 
 ### Initializing  
