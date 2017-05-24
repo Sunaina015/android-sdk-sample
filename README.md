@@ -40,6 +40,16 @@ android {
     }
 }
 ```
+
+### Consumer Key & Secret
+
+Add your consumer key & secret to the xml string file of your application.
+
+```java
+ <string name="consumer_key">your consumer key</string>
+ <string name="consumer_secret">your consumer password</string>
+```
+
 ### Permissions
 
 Add the following permissions to your Android Manifest file:
@@ -105,15 +115,6 @@ To enable Voxeet notifications (getting a new call, conference ended and so on..
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
             </intent-filter>
         </service>
-```
-
-### Consumer Key & Secret
-
-Add your consumer key & secret to the xml string file of your application.
-
-```java
- <string name="consumer_key">your consumer key</string>
- <string name="consumer_secret">your consumer password</string>
 ```
 
 ### Logger
