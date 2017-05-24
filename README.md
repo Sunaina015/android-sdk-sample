@@ -61,24 +61,6 @@ Add the following permissions to your Android Manifest file:
   <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
 ```
 
-To enable Voxeet notifications (getting a new call, conference ended and so on...) on your applications:
-  1. Send us the application fcm token
-  2. Add the google.json file to your project
-  2. Add this to your Android Manifest: 
-
-```java
-    <service android:name="voxeet.com.sdk.firebase.VoxeetFirebaseMessagingService">
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT" />
-            </intent-filter>
-        </service>
-        <service android:name="voxeet.com.sdk.firebase.VoxeetFirebaseInstanceIDService">
-            <intent-filter>
-                <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
-            </intent-filter>
-        </service>
-```
-
 In order to target Android API level 23 or later, you will need to ensure that your application requests runtime permissions for microphone and camera access. To do this, perform the following step:
 
 Request microphone and camera permissions from within your activity/fragment :
@@ -104,6 +86,26 @@ ActivityCompat.requestPermissions(this,
 ```
 
 See the [Official Android Documentation] for more details.
+
+### FCM
+
+To enable Voxeet notifications (getting a new call, conference ended and so on...) on your applications:
+  1. Send us the application fcm token
+  2. Add the google.json file to your project
+  2. Add this to your Android Manifest: 
+
+```java
+    <service android:name="voxeet.com.sdk.firebase.VoxeetFirebaseMessagingService">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+        <service android:name="voxeet.com.sdk.firebase.VoxeetFirebaseInstanceIDService">
+            <intent-filter>
+                <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
+            </intent-filter>
+        </service>
+```
 
 ### Consumer Key & Secret
 
