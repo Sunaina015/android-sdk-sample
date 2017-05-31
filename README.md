@@ -572,6 +572,7 @@ This is the component used to display someone's stream. Two main methods are ava
 ```java
 // Sets the videoview to mirrored or not depending on the boolean value
 public void getRenderer().setMirror(shouldBeMirrored);
+
 <attr name="mirrored" format="boolean" />
 ```
 
