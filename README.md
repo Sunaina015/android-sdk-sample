@@ -661,7 +661,7 @@ VoxeetConferenceBarView conferenceBarView = new VoxeetConferenceBarView.Builder(
         }).mute(R.drawable.selector_mute, new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.e(TAG, "hangup");
+                Log.e(TAG, "mute");
             }
         }).build();
 
