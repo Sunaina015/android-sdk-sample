@@ -24,7 +24,7 @@ dependencies {
     
     
     //add this one aswell if you want to use the voxeet ui toolkit
-    compile 'com.voxeet.sdk.android:toolkit:1.0.022'
+    compile 'com.voxeet.sdk.android:toolkit:1.0.023'
 }
 ```
 ### Recommended settings for API compatibility:
@@ -748,7 +748,7 @@ Only one instance of a conference is allowed to be live. Leaving the current con
 ## Version
 core: 0.8.015
 
-toolkit: 1.0.022
+toolkit: 1.0.023
 
 ## Tech
 
