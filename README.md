@@ -532,11 +532,24 @@ This view regroups all of the others custom components available. We will now go
 It displays a timer for the conference which starts when you join the conference. Also shows a green light which turns to red when the conference is being recorded.
 
 ```java
-<attr name="recording_color" format="color" />
-<attr name="default_color" format="color" />
-<attr name="not_in_conference_color" format="color" />
-<attr name="text_color" format="color" />
-<attr name="timer_mode" format="integer" />
+
+  // indicator color when conference is being recorded
+  <attr name="recording_color" format="color" />
+
+  // indicator color when conference is live
+  <attr name="default_color" format="color" />
+
+  // indicator color when you not in a conference
+  <attr name="not_in_conference_color" format="color" />
+
+  // text color of the timer
+  <attr name="text_color" format="color" />
+  
+  // defines when the timer starts (when joining a conference or when the view is created...)
+  <attr name="timer_mode" format="integer" />
+  
+  // display indicator or not
+  <attr name="color_enabled" format="boolean" />
 ```
 
 ### VoxeetRenderer
