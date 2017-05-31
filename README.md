@@ -620,7 +620,6 @@ public void setMuteSelector(int muteSelector);
 <attr name="record_selector" format="integer" />
 ```
 
-
 To hide/make visible buttons, here are the different methods: 
 
 ```java
@@ -641,6 +640,32 @@ public void setDisplayLeave(boolean displayLeave);
 <attr name="mute_button" format="boolean" />
 <attr name="video_button" format="boolean" />
 <attr name="leave_button" format="boolean" />
+```
+
+You can also use the builder provided, set the buttons order as you wish and finally add the conference bar programmatically: 
+
+```java
+FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+        FrameLayout.LayoutParams.WRAP_CONTENT,
+        FrameLayout.LayoutParams.WRAP_CONTENT);
+         params.gravity = Gravity.BOTTOM | Gravity.CENTER;
+
+VoxeetConferenceBarView conferenceBarView = new VoxeetConferenceBarView.Builder()
+        .with(this)
+        .setLayoutParams(params)
+        .hangUp(R.drawable.selector_hangup, new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.e(TAG, "hangup");
+            }
+        }).mute(R.drawable.selector_mute, new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.e(TAG, "hangup");
+            }
+        }).build();
+
+addContentView(conferenceBarView, conferenceBarView.getLayoutParams());
 ```
 
 ## VoxeetParticipantView
