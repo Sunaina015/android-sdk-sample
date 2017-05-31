@@ -16,15 +16,15 @@ The SDK is a Java library allowing users to:
 
 ### Installing the Android SDK using Gradle
 
-To install the SDK directly into your Android project using the Grade build system and an IDE like Android Studio, add the following entry: "compile 'com.voxeet.sdk:core:0.8.014'" to your build.gradle file as shown below:
+To install the SDK directly into your Android project using the Grade build system and an IDE like Android Studio, add the following entry: "compile 'com.voxeet.sdk:core:0.8.015'" to your build.gradle file as shown below:
 
 ```java
 dependencies {
-    compile 'com.voxeet.sdk.android:core:0.8.014'
+    compile 'com.voxeet.sdk.android:core:0.8.015'
     
     
     //add this one aswell if you want to use the voxeet ui toolkit
-    compile 'com.voxeet.sdk.android:toolkit:1.0.022'
+    compile 'com.voxeet.sdk.android:toolkit:1.0.023'
 }
 ```
 ### Recommended settings for API compatibility:
@@ -553,9 +553,28 @@ It displays a timer for the conference which starts when you join the conference
   <attr name="color_enabled" format="boolean" />
 ```
 
-### VoxeetRenderer
+### VideoView
 
 This is the component used to display someone's stream. Two main methods are available to attach and unattach the different streams: 
+
+```java
+// Sets the videoview's behavior when already attached. Should it auto attach or just stay attached to the old stream.
+ public void setAutoUnAttach(boolean autoUnAttach) {
+        this.autoUnAttach = autoUnAttach;
+}
+```
+
+```java
+// Determines if the videovideo is already attached to a stream
+ public boolean isAttached() 
+```
+
+```java
+// Sets the videoview to mirrored or not depending on the boolean value
+public void getRenderer().setMirror(shouldBeMirrored);
+
+<attr name="mirrored" format="boolean" />
+```
 
 ```java
 // Attach the renderer to the media so we can get the rendering working
@@ -727,9 +746,9 @@ A custom view designed to display an ongoing task like an outgoing/incoming call
 Only one instance of a conference is allowed to be live. Leaving the current conference before creating or joining another one is mandatory. Otherwise, a IllegalStateException will be thrown.
 
 ## Version
-core: 0.8.014
+core: 0.8.015
 
-toolkit: 1.0.022
+toolkit: 1.0.023
 
 ## Tech
 
