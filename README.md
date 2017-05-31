@@ -553,9 +553,26 @@ It displays a timer for the conference which starts when you join the conference
   <attr name="color_enabled" format="boolean" />
 ```
 
-### VoxeetRenderer
+### VideoView
 
 This is the component used to display someone's stream. Two main methods are available to attach and unattach the different streams: 
+
+```java
+// Sets the videoview's behavior when already attached. Should it auto attach or just stay attached to the old stream.
+ public void setAutoUnAttach(boolean autoUnAttach) {
+        this.autoUnAttach = autoUnAttach;
+}
+```
+
+```java
+// Determines if the videovideo is already attached to a stream
+ public boolean isAttached() 
+```
+
+```java
+// Sets the videoview to mirrored or not depending on the boolean value
+ public void getRenderer().setMirror(shouldBeMirrored);
+```
 
 ```java
 // Attach the renderer to the media so we can get the rendering working
@@ -564,6 +581,10 @@ public void attach(String peerId, MediaStream stream);
 
 ```java
 public void unAttach();
+```
+
+```java
+<attr name="mirrored" format="boolean" />
 ```
 
 ### VoxeetIncomingCallButton
