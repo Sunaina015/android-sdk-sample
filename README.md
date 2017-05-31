@@ -99,6 +99,7 @@ See the [Official Android Documentation] for more details.
 
 ### FCM
 
+Please notice the following steps are required only if you plan on using fcm.
 To enable Voxeet notifications (getting a new call, conference ended and so on...) on your applications:
   1. Send us the application fcm token
   2. Add the google.json file to your project
