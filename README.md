@@ -16,11 +16,11 @@ The SDK is a Java library allowing users to:
 
 ### Installing the Android SDK using Gradle
 
-To install the SDK directly into your Android project using the Grade build system and an IDE like Android Studio, add the following entry: "compile 'com.voxeet.sdk:core:0.8.015'" to your build.gradle file as shown below:
+To install the SDK directly into your Android project using the Grade build system and an IDE like Android Studio, add the following entry: "compile 'com.voxeet.sdk:core:0.8.016'" to your build.gradle file as shown below:
 
 ```java
 dependencies {
-    compile 'com.voxeet.sdk.android:core:0.8.015'
+    compile 'com.voxeet.sdk.android:core:0.8.016'
     
     
     //add this one aswell if you want to use the voxeet ui toolkit
@@ -137,11 +137,14 @@ Please also note that WebRTC has its own logger for WebRTC related events.
 
 // if you have external info
 UserInfo externalInfo = new UserInfo(externalName, externalName, externalPhotoUrl);
-
 // else
 UserInfo externalInfo = new UserInfo();
 
+// Firebase disabled
 VoxeetSdk.sdkInitialize(this, consumerKey, consumerSecret, externalInfo);
+
+// Enable firebase or not depending on your needs
+VoxeetSdk.sdkInitialize(this, consumerKey, consumerSecret, externalInfo, enableFirebase);
 
 // Set Default activity to launch when receiving notifications if enabled
 VoxeetSdk.setDefaultActivity(YourIncomingCall.class.getCanonicalName());
@@ -558,7 +561,7 @@ It displays a timer for the conference which starts when you join the conference
 This is the component used to display someone's stream. Two main methods are available to attach and unattach the different streams: 
 
 ```java
-// Sets the videoview's behavior when already attached. Should it auto attach or just stay attached to the old stream.
+// Sets the videoview's behavior when already attached. Should it auto attach or just stay attached to the previous stream.
  public void setAutoUnAttach(boolean autoUnAttach) {
         this.autoUnAttach = autoUnAttach;
 }
@@ -746,7 +749,7 @@ A custom view designed to display an ongoing task like an outgoing/incoming call
 Only one instance of a conference is allowed to be live. Leaving the current conference before creating or joining another one is mandatory. Otherwise, a IllegalStateException will be thrown.
 
 ## Version
-core: 0.8.015
+core: 0.8.016
 
 toolkit: 1.0.023
 
