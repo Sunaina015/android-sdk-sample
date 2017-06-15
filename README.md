@@ -16,11 +16,11 @@ The SDK is a Java library allowing users to:
 
 ### Installing the Android SDK using Gradle
 
-To install the SDK directly into your Android project using the Grade build system and an IDE like Android Studio, add the following entry: "compile 'com.voxeet.sdk:core:0.8.017'" to your build.gradle file as shown below:
+To install the SDK directly into your Android project using the Grade build system and an IDE like Android Studio, add the following entry: "compile 'com.voxeet.sdk:core:0.8.018'" to your build.gradle file as shown below:
 
 ```java
 dependencies {
-    compile 'com.voxeet.sdk.android:core:0.8.017'
+    compile 'com.voxeet.sdk.android:core:0.8.018'
     
     
     //add this one aswell if you want to use the voxeet ui toolkit
@@ -749,7 +749,7 @@ A custom view designed to display an ongoing task like an outgoing/incoming call
 Only one instance of a conference is allowed to be live. Leaving the current conference before creating or joining another one is mandatory. Otherwise, a IllegalStateException will be thrown.
 
 ## Version
-core: 0.8.017
+core: 0.8.018
 
 toolkit: 1.0.023
 
