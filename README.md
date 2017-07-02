@@ -16,11 +16,11 @@ The SDK is a Java library allowing users to:
 
 ### Installing the Android SDK using Gradle
 
-To install the SDK directly into your Android project using the Grade build system and an IDE like Android Studio, add the following entry: "compile 'com.voxeet.sdk:core:0.8.018'" to your build.gradle file as shown below:
+To install the SDK directly into your Android project using the Grade build system and an IDE like Android Studio, add the following entry: "compile 'com.voxeet.sdk:core:0.8.020'" to your build.gradle file as shown below:
 
 ```java
 dependencies {
-    compile 'com.voxeet.sdk.android:core:0.8.018'
+    compile 'com.voxeet.sdk.android:core:0.8.020'
     
     
     //add this one aswell if you want to use the voxeet ui toolkit
@@ -148,6 +148,9 @@ VoxeetSdk.sdkInitialize(this, consumerKey, consumerSecret, externalInfo, enableF
 
 // Set Default activity to launch when receiving notifications if enabled
 VoxeetSdk.setDefaultActivity(YourIncomingCall.class.getCanonicalName());
+
+// Set a timer to stop the conference if none has joined it at the end of the defined timeout
+VoxeetSdk.setSdkTimeout(45000);
 
 // requires the voxeet toolkit lib in the gradle app file
 VoxeetToolkit.initialize(this);
@@ -288,6 +291,13 @@ VoxeetSdk.currentSdkRoute();
 
 ```java
 VoxeetSdk.setSdkoutputRoute(AudioRoute route);
+```
+
+### Setting a timeout
+
+```java
+// Set a timer to stop the conference if none has joined it at the end of the defined timeout
+VoxeetSdk.setSdkTimeout(45000);
 ```
 
 ### Registering the SDK
@@ -749,7 +759,7 @@ A custom view designed to display an ongoing task like an outgoing/incoming call
 Only one instance of a conference is allowed to be live. Leaving the current conference before creating or joining another one is mandatory. Otherwise, a IllegalStateException will be thrown.
 
 ## Version
-core: 0.8.018
+core: 0.8.020
 
 toolkit: 1.0.023
 
