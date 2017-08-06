@@ -16,11 +16,11 @@ The SDK is a Java library allowing users to:
 
 ### Installing the Android SDK using Gradle
 
-To install the SDK directly into your Android project using the Grade build system and an IDE like Android Studio, add the following entry: "compile 'com.voxeet.sdk:core:0.8.020'" to your build.gradle file as shown below:
+To install the SDK directly into your Android project using the Grade build system and an IDE like Android Studio, add the following entry: "compile 'com.voxeet.sdk:core:0.8.021'" to your build.gradle file as shown below:
 
 ```java
 dependencies {
-    compile 'com.voxeet.sdk.android:core:0.8.020'
+    compile 'com.voxeet.sdk.android:core:0.8.021'
     
     
     //add this one aswell if you want to use the voxeet ui toolkit
@@ -157,6 +157,20 @@ VoxeetToolkit.initialize(this);
 VoxeetToolkit.enableOverlay(true);
 ```
 
+### Open Session
+
+```java
+// Open Sdk Session. Equivalent to login
+VoxeetSdk.openSdkSession();
+```
+
+### Logout
+
+```java
+// Basic logout and socket disconnect
+VoxeetSdk.sdkLogout();
+```
+
 ### Enabling / Disabling the Voxeet overlay
 Enables a view (VoxeetConferenceView) on top of your current view when joining/creating a conference and will allow you to manage the current conference easily and in a stylish fashion. It regroups many objects from the Voxeet UI toolkit. Can be turned on/off at any point in time.
 
@@ -201,6 +215,12 @@ VoxeetSdk.leaveSdkConference();
 ```java
 // if successful, a ConferenceUserUpdatedEvent will be posted with the mediastream updated
 VoxeetSdk.toggleSdkVideo();
+```
+
+### Retrieving list of invited (not in the conference yet) users to the conference
+
+```java
+VoxeetSdk.getSdkInvitedUsers();
 ```
 
 ### Enabling/disabling conference recording
@@ -759,7 +779,7 @@ A custom view designed to display an ongoing task like an outgoing/incoming call
 Only one instance of a conference is allowed to be live. Leaving the current conference before creating or joining another one is mandatory. Otherwise, a IllegalStateException will be thrown.
 
 ## Version
-core: 0.8.020
+core: 0.8.021
 
 toolkit: 1.0.023
 
