@@ -160,7 +160,7 @@ VoxeetToolkit.enableOverlay(true);
 ### Open Session
 
 ```java
-// Open Sdk Session. Equivalent to login
+// Open Sdk Session. Equivalent to login. Included in the initialize method. Use it after disconnecting or encountering an issue requiring to reidentify. (Opens the websocket if call is successful)
 VoxeetSdk.openSdkSession();
 ```
 
