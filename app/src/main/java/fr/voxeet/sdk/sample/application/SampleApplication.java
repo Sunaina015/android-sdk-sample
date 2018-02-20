@@ -6,8 +6,6 @@ import android.support.annotation.NonNull;
 import android.support.multidex.MultiDex;
 import android.util.Log;
 
-import com.google.firebase.FirebaseApp;
-
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -17,17 +15,12 @@ import java.util.List;
 
 import fr.voxeet.sdk.sample.BuildConfig;
 import fr.voxeet.sdk.sample.Recording;
-import fr.voxeet.sdk.sample.activities.CreateConfActivity;
 import sdk.voxeet.com.toolkit.controllers.AbstractConferenceToolkitController;
-import sdk.voxeet.com.toolkit.controllers.ConferenceToolkitController;
-import sdk.voxeet.com.toolkit.controllers.ReplayMessageToolkitController;
 import sdk.voxeet.com.toolkit.main.VoxeetToolkit;
 import sdk.voxeet.com.toolkit.views.uitookit.sdk.overlays.OverlayState;
-import voxeet.com.sdk.core.VoxeetPreferences;
 import voxeet.com.sdk.core.VoxeetSdk;
 import voxeet.com.sdk.events.error.SdkLogoutErrorEvent;
 import voxeet.com.sdk.events.success.SdkLogoutSuccessEvent;
-import voxeet.com.sdk.events.success.SocketStateChangeEvent;
 import voxeet.com.sdk.json.UserInfo;
 
 /**
@@ -56,7 +49,6 @@ public class SampleApplication extends Application {
         VoxeetToolkit.getInstance().getReplayMessageToolkit().setDefaultOverlayState(OverlayState.EXPANDED);
 
 
-        //prevent close from
         //init the SDK
         VoxeetSdk.initialize(this,
                 BuildConfig.CONSUMER_KEY,
