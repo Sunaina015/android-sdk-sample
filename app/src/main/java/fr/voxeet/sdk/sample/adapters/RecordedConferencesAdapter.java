@@ -66,7 +66,7 @@ public class RecordedConferencesAdapter extends BaseAdapter {
 
         holder.date.setText(new Date(recording.timestamp).toString());
 
-        holder.title.setText("Conference #" + (position + 1));
+        holder.title.setText("IConference #" + (position + 1));
 
         return convertView;
     }

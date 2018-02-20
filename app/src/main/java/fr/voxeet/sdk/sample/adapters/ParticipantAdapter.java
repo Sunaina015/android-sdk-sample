@@ -20,11 +20,10 @@ import java.util.List;
 import java.util.Map;
 
 import fr.voxeet.sdk.sample.R;
-import sdk.voxeet.com.toolkit.views.uitookit.RoundedImageView;
-import sdk.voxeet.com.toolkit.views.uitookit.VideoView;
+import sdk.voxeet.com.toolkit.views.android.RoundedImageView;
+import sdk.voxeet.com.toolkit.views.uitookit.nologic.VideoView;
 import voxeet.com.sdk.core.VoxeetSdk;
 import voxeet.com.sdk.json.UserInfo;
-import voxeet.com.sdk.models.abs.ConferenceUser;
 import voxeet.com.sdk.models.impl.DefaultConferenceUser;
 
 /**
@@ -35,7 +34,7 @@ public class ParticipantAdapter extends BaseAdapter {
 
     private Context context;
 
-    private List<ConferenceUser> participants;
+    private List<DefaultConferenceUser> participants;
 
     private LayoutInflater inflater;
 
@@ -69,20 +68,20 @@ public class ParticipantAdapter extends BaseAdapter {
         this.mediaStreamMap = mediaStreamMap;
     }
 
-    public void removeParticipant(ConferenceUser user) {
+    public void removeParticipant(DefaultConferenceUser user) {
         participants.remove(user);
     }
 
-    private ConferenceUser doesContain(final ConferenceUser user) {
-        return Iterables.find(participants, new Predicate<ConferenceUser>() {
+    private DefaultConferenceUser doesContain(final DefaultConferenceUser user) {
+        return Iterables.find(participants, new Predicate<DefaultConferenceUser>() {
             @Override
-            public boolean apply(ConferenceUser input) {
+            public boolean apply(DefaultConferenceUser input) {
                 return user.getUserId().equalsIgnoreCase(input.getUserId());
             }
         }, null);
     }
 
-    public void addParticipant(ConferenceUser conferenceUser) {
+    public void addParticipant(DefaultConferenceUser conferenceUser) {
         if (doesContain(conferenceUser) == null) {
             participants.add(conferenceUser);
 
@@ -126,14 +125,16 @@ public class ParticipantAdapter extends BaseAdapter {
 
         UserInfo info = user.getUserInfo();
 
-        if (mediaStreamMap.containsKey(user.getUserId())) {
+        if (mediaStreamMap != null && mediaStreamMap.containsKey(user.getUserId())) {
             MediaStream mediaStream = mediaStreamMap.get(user.getUserId());
-            if (mediaStream.hasVideo()) {
-                holder.avatar.setVisibility(View.VISIBLE);
-                holder.avatar.attach(user.getUserId(), mediaStreamMap.get(user.getUserId()));
-            } else {
-                holder.avatar.setVisibility(View.GONE);
-                holder.avatar.unAttach();
+            if (mediaStream != null) {
+                if (mediaStream.hasVideo()) {
+                    holder.avatar.setVisibility(View.VISIBLE);
+                    holder.avatar.attach(user.getUserId(), mediaStreamMap.get(user.getUserId()));
+                } else {
+                    holder.avatar.setVisibility(View.GONE);
+                    holder.avatar.unAttach();
+                }
             }
         }
 
@@ -146,7 +147,7 @@ public class ParticipantAdapter extends BaseAdapter {
         holder.avatar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                VoxeetSdk.muteSdkUser(user.getUserId(), !user.isMuted());
+                VoxeetSdk.getInstance().getConferenceService().muteUser(user.getUserId(), !user.isMuted());
 
                 Toast.makeText(context, "Mute set to: " + user.isMuted(), Toast.LENGTH_SHORT).show();
             }
@@ -198,7 +199,7 @@ public class ParticipantAdapter extends BaseAdapter {
 
         positionMap.put(userId, new RoomPosition(angle, distance));
 
-        VoxeetSdk.changePeerPosition(userId, angle, distance);
+        VoxeetSdk.getInstance().getConferenceService().changePeerPosition(userId, angle, distance);
     }
 
     private class ViewHolder {

@@ -1,10 +1,7 @@
 package fr.voxeet.sdk.sample.dialogs;
 
-import android.annotation.SuppressLint;
 import android.app.DialogFragment;
-import android.content.Context;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,28 +23,19 @@ import voxeet.com.sdk.core.VoxeetSdk;
  * Created by Thomas on 08/12/2015.
  */
 public class ConferenceOutput extends DialogFragment {
-
     public static final String TAG = ConferenceOutput.class.getSimpleName();
 
-    private ListView outputListView;
+    protected ListView outputListView;
 
     private List<Media.AudioRoute> currentRoutes;
 
-    @NonNull
     private List<String> routesDescription = Arrays.asList("Headset", "Phone", "Speaker", "Bluetooth");
-
-    private Context context;
 
     public ConferenceOutput() {
     }
 
-    @SuppressLint("ValidFragment")
-    public ConferenceOutput(Context context) {
-        this.context = context;
-    }
-
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.dialog_conference_output, container, true);
 
         outputListView = (ListView) v.findViewById(R.id.output_list_view);
@@ -62,26 +50,26 @@ public class ConferenceOutput extends DialogFragment {
         outputListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                currentRoutes = VoxeetSdk.getSdkAvailableRoutes();
-
-                VoxeetSdk.setSdkoutputRoute(currentRoutes.get(position));
+                VoxeetSdk.getInstance().getConferenceService().setAudioRoute(currentRoutes.get(position));
 
                 dismiss();
             }
         });
     }
 
+    //this method is only called in onResume()
+    //then getActivity is valid
     protected void setRoutesFromAudioSession() {
-        currentRoutes = VoxeetSdk.getSdkAvailableRoutes();
+        currentRoutes = VoxeetSdk.getInstance().getConferenceService().getAvailableRoutes();
 
         List<String> desc = new ArrayList<>();
         for (Media.AudioRoute r : currentRoutes) {
             desc.add(routesDescription.get(r.value()));
         }
 
-        outputListView.setAdapter(new ArrayAdapter<>(context, android.R.layout.simple_list_item_single_choice, desc.toArray(new String[desc.size()])));
+        outputListView.setAdapter(new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_single_choice, desc.toArray(new String[desc.size()])));
 
-        Media.AudioRoute selectedRoute = VoxeetSdk.currentSdkRoute();
+        Media.AudioRoute selectedRoute = VoxeetSdk.getInstance().getConferenceService().currentRoute();
 
         outputListView.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
         outputListView.setItemChecked(currentRoutes.indexOf(selectedRoute), true);

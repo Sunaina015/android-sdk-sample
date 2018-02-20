@@ -2,38 +2,42 @@ package fr.voxeet.sdk.sample.activities;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.PowerManager;
-import android.provider.Settings;
-import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.Arrays;
+import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import fr.voxeet.sdk.sample.R;
+import fr.voxeet.sdk.sample.application.SampleApplication;
+import fr.voxeet.sdk.sample.main_screen.UserAdapter;
+import fr.voxeet.sdk.sample.main_screen.UserItem;
+import fr.voxeet.sdk.sample.users.UsersHelper;
+import sdk.voxeet.com.toolkit.controllers.ReplayMessageToolkitController;
+import sdk.voxeet.com.toolkit.main.VoxeetToolkit;
+import voxeet.com.sdk.core.VoxeetPreferences;
+import voxeet.com.sdk.core.VoxeetSdk;
 import voxeet.com.sdk.events.success.SocketConnectEvent;
+import voxeet.com.sdk.events.success.SocketStateChangeEvent;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements UserAdapter.UserClickListener {
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private static final int RECORD_AUDIO_RESULT = 0x20;
@@ -46,22 +50,28 @@ public class MainActivity extends AppCompatActivity {
 
     private int lastAction;
 
-    @Bind(R.id.demo)
-    protected Button demoCall;
-
-    @Bind(R.id.create_conf)
-    protected Button createConf;
+    @Bind(R.id.join_conf_text)
+    EditText joinConfEditText;
 
     @Bind(R.id.join_conf)
     protected Button joinConf;
 
-    @Bind(R.id.replay_conf)
-    protected Button replayConf;
+    @Bind(R.id.disconnect)
+    protected Button disconnect;
 
-    private static String[] PERMISSIONS_STORAGE = {
+    @Bind(R.id.recycler_users)
+    protected RecyclerView users;
+
+    private final static String[] PERMISSIONS_STORAGE = {
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE
     };
+
+    //In the example, this field will be set to true when "starting" a conference after login
+    private boolean _start_after_log_event = false;
+    private Intent _after_relogged_intent = null;
+
+    private SampleApplication _application;
 
     @Override
     public void onRequestPermissionsResult(int requestCode,
@@ -73,12 +83,6 @@ public class MainActivity extends AppCompatActivity {
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
                     switch (lastAction) {
-                        case DEMO:
-                            startDemoCall();
-                            break;
-                        case CREATE:
-                            createConf();
-                            break;
                         case JOIN:
                             joinCall();
                             break;
@@ -106,36 +110,15 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-
-        setSupportActionBar(toolbar);
-
         EventBus.getDefault().register(this);
 
         ButterKnife.bind(this);
 
         verifyStoragePermissions(this);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            String packageName = getPackageName();
-            PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-            if (!pm.isIgnoringBatteryOptimizations(packageName)) {
-                Intent intent = new Intent();
-                intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
-                intent.setData(Uri.parse("package:" + packageName));
-                startActivity(intent);
-            }
-        }
-    }
+        users.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
 
-    @OnClick(R.id.demo)
-    public void demoButton() {
-        startDemoCall();
-    }
-
-    @OnClick(R.id.create_conf)
-    public void createButton() {
-        createConf();
+        users.setAdapter(new UserAdapter(this, UsersHelper.USER_ITEMS));
     }
 
     @OnClick(R.id.join_conf)
@@ -143,9 +126,10 @@ public class MainActivity extends AppCompatActivity {
         joinCall();
     }
 
-    @OnClick(R.id.replay_conf)
-    public void replayButton() {
-        replayConf();
+    @OnClick(R.id.disconnect)
+    public void onDisconnectClick() {
+
+        VoxeetSdk.getInstance().logout();
     }
 
     public void verifyStoragePermissions(Activity context) {
@@ -160,14 +144,6 @@ public class MainActivity extends AppCompatActivity {
                     REQUEST_EXTERNAL_STORAGE
             );
         }
-    }
-
-    private void replayConf() {
-        conferenceActivity(lastAction = REPLAY);
-    }
-
-    private void startDemoCall() {
-        conferenceActivity(lastAction = DEMO);
     }
 
     private void joinCall() {
@@ -196,33 +172,45 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case JOIN:
                 default:
+                    intent.putExtra("confAlias", joinConfEditText.getText().toString());
                     intent.putExtra("join", true);
                     break;
             }
-
             startActivity(intent);
         }
     }
 
-    @Subscribe
-    public void onEvent(SocketConnectEvent event) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                demoCall.setEnabled(true);
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEvent(final SocketConnectEvent event) {
+        Log.d("MainActivity", "SocketConnectEvent" + event.message());
+        joinConf.setEnabled(true);
+        disconnect.setVisibility(View.VISIBLE);
 
-                createConf.setEnabled(true);
+        ((UserAdapter) users.getAdapter()).setSelected(_application.getCurrentUser());
 
-                joinConf.setEnabled(true);
+        if (_start_after_log_event && _after_relogged_intent != null) {
+            //startActivity(_after_relogged_intent);
+            _after_relogged_intent = null;
+        }
+    }
 
-                replayConf.setEnabled(true);
-            }
-        });
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEvent(SocketStateChangeEvent event) {
+        Log.d("MainActivity", "SocketStateChangeEvent " + event.message());
+
+        switch (event.message()) {
+            case "CLOSING":
+                joinConf.setEnabled(false);
+                disconnect.setVisibility(View.GONE);
+                ((UserAdapter)users.getAdapter()).reset();
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+
+        _application = (SampleApplication) getApplication();
     }
 
     @Override
@@ -235,5 +223,19 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
 
         EventBus.getDefault().unregister(this);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(VoxeetToolkit.getInstance().getReplayMessageToolkit().isShowing()) {
+            VoxeetSdk.getInstance().getConferenceService().leave();
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
+    public void onUserSelected(UserItem user_item) {
+        _application.selectUser(user_item.getUserInfo());
     }
 }

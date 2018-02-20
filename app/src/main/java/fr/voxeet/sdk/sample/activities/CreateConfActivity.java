@@ -3,18 +3,20 @@ package fr.voxeet.sdk.sample.activities;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -27,6 +29,7 @@ import com.voxeet.android.media.MediaStream;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +43,13 @@ import fr.voxeet.sdk.sample.adapters.ParticipantAdapter;
 import fr.voxeet.sdk.sample.adapters.RecordedConferencesAdapter;
 import fr.voxeet.sdk.sample.application.SampleApplication;
 import fr.voxeet.sdk.sample.dialogs.ConferenceOutput;
-import sdk.voxeet.com.toolkit.views.uitookit.VideoView;
+import fr.voxeet.sdk.sample.users.UsersHelper;
+import sdk.voxeet.com.toolkit.controllers.ReplayMessageToolkitController;
+import sdk.voxeet.com.toolkit.main.VoxeetToolkit;
+import sdk.voxeet.com.toolkit.views.uitookit.nologic.VideoView;
+import sdk.voxeet.com.toolkit.views.uitookit.sdk.VoxeetConferenceBarView;
+import sdk.voxeet.com.toolkit.views.uitookit.sdk.VoxeetLoadingView;
+import sdk.voxeet.com.toolkit.views.uitookit.sdk.VoxeetReplayMessageView;
 import voxeet.com.sdk.core.VoxeetPreferences;
 import voxeet.com.sdk.core.VoxeetSdk;
 import voxeet.com.sdk.events.success.ConferenceJoinedSuccessEvent;
@@ -51,10 +60,11 @@ import voxeet.com.sdk.events.success.ConferenceUserUpdatedEvent;
 import voxeet.com.sdk.events.success.MessageReceived;
 import voxeet.com.sdk.events.success.ScreenStreamAddedEvent;
 import voxeet.com.sdk.events.success.ScreenStreamRemovedEvent;
+import voxeet.com.sdk.events.success.StopRecordingResultEvent;
 import voxeet.com.sdk.json.ConferenceEnded;
 import voxeet.com.sdk.json.RecordingStatusUpdateEvent;
 import voxeet.com.sdk.models.RecordingStatus;
-import voxeet.com.sdk.models.abs.ConferenceUser;
+import voxeet.com.sdk.models.impl.DefaultConferenceUser;
 
 import static android.view.View.VISIBLE;
 
@@ -63,11 +73,15 @@ import static android.view.View.VISIBLE;
  */
 public class CreateConfActivity extends AppCompatActivity {
 
+    public static final String INVIT_EXTERNAL_IDS = "INVIT_EXTERNAL_IDS";
     private int action;
 
     private static final String TAG = CreateConfActivity.class.getSimpleName();
 
     private static final int CAMERA_REQUEST = 0x0010;
+
+    @Bind(R.id.toolbar)
+    protected Toolbar toolbar;
 
     @Bind(R.id.participants)
     protected ListView participants;
@@ -114,17 +128,22 @@ public class CreateConfActivity extends AppCompatActivity {
     @Bind(R.id.recorded_conf_list)
     protected ListView recordedConferences;
 
+    @Bind(R.id.conference_bar)
+    protected VoxeetConferenceBarView conferenceBarView;
+
+    @Bind(R.id.loading_view)
+    protected VoxeetLoadingView loadingView;
+
     @NonNull
     private Map<String, MediaStream> mediaStreamMap = new HashMap<>();
 
     private ParticipantAdapter adapter;
 
-    private Handler handler;
-
     @Nullable
     private ProgressDialog dialog = null;
 
     private ConferenceOutput conferenceOutput = null;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -134,13 +153,16 @@ public class CreateConfActivity extends AppCompatActivity {
 
         ButterKnife.bind(this);
 
+        setSupportActionBar(toolbar);
+
+        getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         adapter = new ParticipantAdapter(this);
 
         participants.setAdapter(adapter);
 
-        conferenceOutput = new ConferenceOutput(this);
-
-        handler = new Handler(Looper.getMainLooper());
+        conferenceOutput = new ConferenceOutput();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.CAMERA}, CAMERA_REQUEST);
@@ -148,35 +170,46 @@ public class CreateConfActivity extends AppCompatActivity {
             initConf();
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()) {
+            case android.R.id.home:
+                finish();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     @OnClick(R.id.toggle_video)
     public void toggleVideo() {
-        VoxeetSdk.toggleSdkVideo();
+        VoxeetSdk.getInstance().getConferenceService().toggleVideo();
     }
 
     @OnClick(R.id.leaveConf)
     public void leave() {
-        VoxeetSdk.leaveSdkConference();
+        VoxeetSdk.getInstance().getConferenceService().leave();
     }
 
     @OnClick(R.id.record)
     public void toggleRecord() {
-        VoxeetSdk.toggleSdkRecording();
+        VoxeetSdk.getInstance().getConferenceService().toggleRecording();
     }
 
     @OnClick(R.id.send_broadcast)
     public void sendBroadcast() {
-        VoxeetSdk.sendSdkBroadcast(broadcastConference.getText().toString());
+        //TODO check
+        //VoxeetSdk.getInstance().getConferenceService().sendMessage(broadcastConference.getText().toString());
     }
 
     @OnClick(R.id.mute)
     public void mute() {
-        boolean muted = !VoxeetSdk.isSdkMuted();
+        boolean muted = !VoxeetSdk.getInstance().getConferenceService().isMuted();
         if (muted)
             mute.setText("Muted");
         else
             mute.setText("Not Muted");
 
-        VoxeetSdk.muteSdkConference(muted);
+        VoxeetSdk.getInstance().getConferenceService().muteConference(muted);
     }
 
     @OnClick(R.id.audio_routes)
@@ -190,14 +223,32 @@ public class CreateConfActivity extends AppCompatActivity {
         }
     }
 
+    @Deprecated
     @OnClick(R.id.join)
     public void join() {
-        VoxeetSdk.register(this, this);
+        join(editextConference.getText().toString());
+    }
 
-        if (action == MainActivity.JOIN)
-            VoxeetSdk.joinSdkConference(editextConference.getText().toString());
-        else if (action == MainActivity.REPLAY)
-            VoxeetSdk.replaySdkConference(editextConference.getText().toString());
+    public void join(String confAlias) {
+        if (!VoxeetSdk.getInstance().register(this, this)) {
+            Toast.makeText(getApplicationContext(), getApplicationContext().getString(R.string.register_conf_error), Toast.LENGTH_SHORT).show();
+            finish();
+        }
+
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(joinLayout.getWindowToken(), 0);
+
+        switch (action) {
+            case MainActivity.JOIN:
+
+                //VoxeetToolkit.getInstance().getConferenceToolkit().join(confAlias);
+                VoxeetToolkit.getInstance().getReplayMessageToolkit().replay("591e1dd6-1200-4e49-9542-40f639180922", 0);
+                break;
+            case MainActivity.REPLAY:
+                VoxeetToolkit.getInstance().getReplayMessageToolkit().replay(confAlias, 0);
+                break;
+            default:
+        }
 
         showProgress();
     }
@@ -221,13 +272,27 @@ public class CreateConfActivity extends AppCompatActivity {
         if (getIntent().hasExtra("join")) {
             action = MainActivity.JOIN;
 
-            setTitle("Join Conference");
+            setTitle("");//Join IConference");
 
-            displayJoin();
+            String confIdOrAlias = null;
+
+            if(getIntent().hasExtra("confAlias")) {
+                confIdOrAlias = getIntent().getStringExtra("confAlias");
+            } else if(getIntent().hasExtra("conferenceId")){
+                confIdOrAlias = getIntent().getStringExtra("conferenceId");
+            }
+
+            if(confIdOrAlias != null) {
+                join(confIdOrAlias);
+                //displayJoin();
+            } else {
+                finish();
+                return;
+            }
         } else if (getIntent().hasExtra("replay")) {
             action = MainActivity.REPLAY;
 
-            setTitle("Replay Conference");
+            setTitle("Replay IConference");
 
             List<Recording> confs = ((SampleApplication) getApplication()).getRecordedConferences();
             if (confs.size() > 0) {
@@ -236,7 +301,7 @@ public class CreateConfActivity extends AppCompatActivity {
                 recordedConferences.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                        VoxeetSdk.replaySdkConference(((Recording) recordedConferences.getItemAtPosition(i)).conferenceId);
+                        VoxeetToolkit.getInstance().getReplayMessageToolkit().replay(((Recording) recordedConferences.getItemAtPosition(i)).conferenceId, 0);
 
                         showProgress();
 
@@ -251,20 +316,27 @@ public class CreateConfActivity extends AppCompatActivity {
 
             showProgress();
 
-            setTitle("Demo Conference");
+            setTitle("Demo IConference");
 
-            VoxeetSdk.createSdkDemo();
-        } else {
+            VoxeetToolkit.getInstance().getConferenceToolkit().demo();
+        } else if(getIntent().hasExtra("create")){
             action = MainActivity.CREATE;
 
             showProgress();
 
-            setTitle("Create Conference");
+            setTitle("Create IConference");
 
-            VoxeetSdk.createSdkConference();
+            VoxeetToolkit.getInstance().getConferenceToolkit().create();
+        } else {
+            Toast.makeText(this, getString(R.string.invalid_activity_start_intent), Toast.LENGTH_SHORT).show();
+            finish();
+            return;
         }
 
-        VoxeetSdk.register(this, this);
+        if (!VoxeetSdk.getInstance().register(this, this)) {
+            Toast.makeText(getApplicationContext(), getApplicationContext().getString(R.string.register_conf_error), Toast.LENGTH_SHORT).show();
+            finish();
+        }
     }
 
     private void displayJoin() {
@@ -287,7 +359,7 @@ public class CreateConfActivity extends AppCompatActivity {
         alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, getString(R.string.ok), new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int id) {
-                VoxeetSdk.leaveSdkConference();
+                VoxeetSdk.getInstance().getConferenceService().leave();
             }
         });
         alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, getString(R.string.cancel), new DialogInterface.OnClickListener() {
@@ -299,7 +371,7 @@ public class CreateConfActivity extends AppCompatActivity {
         alertDialog.show();
     }
 
-    private void updateStreams(ConferenceUser user, MediaStream mediaStream) {
+    private void updateStreams(DefaultConferenceUser user, MediaStream mediaStream) {
         mediaStreamMap.put(user.getUserId(), mediaStream);
 
         if (user.getUserId().equalsIgnoreCase(VoxeetPreferences.id())) {
@@ -317,7 +389,7 @@ public class CreateConfActivity extends AppCompatActivity {
         }
     }
 
-    private void addParticipant(ConferenceUser user) {
+    private void addParticipant(DefaultConferenceUser user) {
         adapter.addParticipant(user);
         adapter.updateMediaStreams(mediaStreamMap);
         adapter.notifyDataSetChanged();
@@ -325,6 +397,7 @@ public class CreateConfActivity extends AppCompatActivity {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(final ConferenceJoinedSuccessEvent event) {
+        Log.d("CreateConfActivity", "ConferencejoinedSuccessEvent "+event.getConferenceId()+" "+event.getAliasId());
         hideProgress();
 
         leave.setVisibility(VISIBLE);
@@ -342,20 +415,26 @@ public class CreateConfActivity extends AppCompatActivity {
 
             sendText.setVisibility(VISIBLE);
         }
+
+        List<String> external_ids = UsersHelper.getExternalIds(VoxeetPreferences.id());
+
+        VoxeetSdk.getInstance().getConferenceService().invite(null, external_ids);
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(final ConferenceLeftSuccessEvent event) {
+        Log.d(TAG, "onEvent: " + event.getClass().getSimpleName());
         onConferenceEnding();
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(final ConferenceEnded event) {
+        Log.d(TAG, "onEvent: " + event.getClass().getSimpleName());
         onConferenceEnding();
     }
 
-    private void onConferenceEnding() {
-        VoxeetSdk.unregister(CreateConfActivity.this);
+    private void    onConferenceEnding() {
+        VoxeetSdk.getInstance().unregister(CreateConfActivity.this);
 
         screenShare.unAttach(); // unattaching just in case
 
@@ -364,24 +443,28 @@ public class CreateConfActivity extends AppCompatActivity {
         finish();
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
+    @Subscribe
     public void onEvent(final ConferenceUserLeftEvent event) {
+        Log.d(TAG, "onEvent: " + event.getClass().getSimpleName());
         adapter.removeParticipant(event.getUser());
         adapter.notifyDataSetChanged();
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
+    @Subscribe
     public void onEvent(final ConferenceUserJoinedEvent event) {
+        Log.d("CreateConfActivity", "ConferenceUserJoinedEvent " + event.message() + " " + event.getUser().getUserInfo().getExternalId()+" "+event.getUser().isOwner());
         updateStreams(event.getUser(), event.getMediaStream());
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
+    @Subscribe
     public void onEvent(final ConferenceUserUpdatedEvent event) {
+        Log.d(TAG, "onEvent: " + event.getClass().getSimpleName());
         updateStreams(event.getUser(), event.getMediaStream());
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
+    @Subscribe
     public void onEvent(ScreenStreamAddedEvent event) {
+        Log.d(TAG, "onEvent: " + event.getClass().getSimpleName());
         MediaStream mediaStream = event.getMediaStream();
         if (mediaStream != null && mediaStream.hasVideo()) { // attaching stream
             screenShare.setVisibility(VISIBLE);
@@ -389,8 +472,9 @@ public class CreateConfActivity extends AppCompatActivity {
         }
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
+    @Subscribe
     public void onEvent(RecordingStatusUpdateEvent event) {
+        Log.d(TAG, "onEvent: " + event.getClass().getSimpleName());
         if (event.getRecordingStatus().equalsIgnoreCase(RecordingStatus.RECORDING.name())) {
             ((SampleApplication) getApplication()).saveRecordingConference(new Recording(event.getConferenceId(), event.getTimeStamp()));
 
@@ -400,15 +484,16 @@ public class CreateConfActivity extends AppCompatActivity {
         }
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
+    @Subscribe
     public void onEvent(ScreenStreamRemovedEvent event) { // unattaching stream
+        Log.d(TAG, "onEvent: " + event.getClass().getSimpleName());
         screenShare.setVisibility(View.GONE);
         screenShare.unAttach();
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
+    @Subscribe
     public void onEvent(MessageReceived event) {
-        Toast.makeText(this, event.getMessage(), Toast.LENGTH_SHORT).show();
+        Log.e(TAG, event.getMessage());
     }
 
     public void showProgress() {
