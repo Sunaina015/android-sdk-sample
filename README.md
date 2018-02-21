@@ -20,7 +20,7 @@ To install the SDK directly into your Android project using the Grade build syst
 
 ```gradle
 dependencies {
-  compile ('com.voxeet.sdk:toolkit:0.9.1.5.8.2') {
+  compile ('com.voxeet.sdk:toolkit:0.9.1.5.8.1') {
     transitive = true
   }
 }
@@ -765,7 +765,7 @@ Only one instance of a conference is allowed to be live. Leaving the current con
 
 
 public-sdk: 0.9.1.5.7
-toolkit: 0.9.1.5.8.2
+toolkit: 0.9.1.5.8.1
 
 ## Tech
 
