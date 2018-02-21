@@ -236,9 +236,7 @@ public class CreateConfActivity extends AppCompatActivity {
 
         switch (action) {
             case MainActivity.JOIN:
-
-                //VoxeetToolkit.getInstance().getConferenceToolkit().join(confAlias);
-                VoxeetToolkit.getInstance().getReplayMessageToolkit().replay("591e1dd6-1200-4e49-9542-40f639180922", 0);
+                VoxeetToolkit.getInstance().getConferenceToolkit().join(confAlias);
                 break;
             case MainActivity.REPLAY:
                 VoxeetToolkit.getInstance().getReplayMessageToolkit().replay(confAlias, 0);
