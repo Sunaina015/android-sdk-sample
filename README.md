@@ -16,11 +16,11 @@ The SDK is a Java library allowing users to:
 
 ### Installing the Android SDK using Gradle
 
-To install the SDK directly into your Android project using the Grade build system and an IDE like Android Studio, add the following entry: "compile 'com.voxeet.sdk:core:0.9.1.5.8.1'" to your build.gradle file as shown below:
+To install the SDK directly into your Android project using the Grade build system and an IDE like Android Studio, add the following entry to your build.gradle file as shown below:
 
 ```gradle
 dependencies {
-  compile ('com.voxeet.sdk:toolkit:0.9.1.5.8.1') {
+  compile ('com.voxeet.sdk:toolkit:0.9.1.5.8.2.4') {
     transitive = true
   }
 }
@@ -241,6 +241,26 @@ VoxeetSdk.getInstance().getConferenceService().leave();
 ```java
 // if successful, a ConferenceUserUpdatedEvent will be posted with the mediastream updated
 VoxeetSdk.getInstance().getConferenceService().toggleVideo();
+```
+
+### Change the camera
+
+It is possible to set the default camera the app will use :
+
+```java
+VoxeetSdk.getInstance().getConferenceService().setDefaultCamera(String cameraName);
+```
+
+In this sample, the cameraName can be used with the following calls :
+
+```java
+CameraEnumerationAndroid.getNameOfBackFacingDevice();
+CameraEnumerationAndroid.getNameOfFrontFacingDevice();
+```
+
+When using the toolkit, note that a "clic" on the "self" video will trigger a switchCamera() :
+```java
+VoxeetSdk.getInstance().getConferenceService().switchCamera();
 ```
 
 ### Retrieving list of invited (not in the conference yet) users to the conference
@@ -764,8 +784,8 @@ Only one instance of a conference is allowed to be live. Leaving the current con
 ## Version
 
 
-public-sdk: 0.9.1.5.7
-toolkit: 0.9.1.5.8.1
+public-sdk: 0.9.1.5.8.3.1
+toolkit: 0.9.1.5.8.2.4
 
 ## Tech
 

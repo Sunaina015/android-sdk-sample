@@ -63,7 +63,7 @@ dependencies {
     compile 'com.android.support:design:26.1.0'
 
     annotationProcessor 'com.jakewharton:butterknife:7.0.1'
-    compile ('com.voxeet.sdk:toolkit:0.9.1.5.8.1') {
+    compile ('com.voxeet.sdk:toolkit:0.9.1.5.8.2.4') {
         transitive = true
     }
 }
