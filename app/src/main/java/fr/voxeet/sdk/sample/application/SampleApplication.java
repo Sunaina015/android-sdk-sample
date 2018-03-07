@@ -6,6 +6,8 @@ import android.support.annotation.NonNull;
 import android.support.multidex.MultiDex;
 import android.util.Log;
 
+//import com.voxeet.android.media.video.CameraEnumerationAndroid;
+
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -57,6 +59,16 @@ public class SampleApplication extends Application {
 
         //register the Application and add at least one subscriber
         VoxeetSdk.getInstance().register(this, this);
+
+        //it is possible to change the default camera the app will use when starting video recording
+        //for instance with the front camera : - used by default
+        //VoxeetSdk.getInstance().getConferenceService()
+        //        .setDefaultCamera(CameraEnumerationAndroid.getNameOfFrontFacingDevice());
+
+        //or the back camera
+        //VoxeetSdk.getInstance().getConferenceService()
+        //        .setDefaultCamera(CameraEnumerationAndroid.getNameOfBackFacingDevice());
+        //WARNING : note that using the name of a camera not available in the system will cause a crash
     }
 
     @Override

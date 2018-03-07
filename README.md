@@ -20,7 +20,7 @@ To install the SDK directly into your Android project using the Grade build syst
 
 ```gradle
 dependencies {
-  compile ('com.voxeet.sdk:toolkit:0.9.1.5.8.2.4') {
+  compile ('com.voxeet.sdk:toolkit:0.9.1.5.8.3.2') {
     transitive = true
   }
 }
@@ -119,6 +119,7 @@ To enable Voxeet notifications (getting a new call, conference ended and so on..
         <action android:name="com.google.firebase.MESSAGING_EVENT" />
       </intent-filter>
     </service>
+
     <service android:name="voxeet.com.sdk.firebase.VoxeetFirebaseInstanceIDService">
       <intent-filter>
         <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
@@ -784,8 +785,8 @@ Only one instance of a conference is allowed to be live. Leaving the current con
 ## Version
 
 
-public-sdk: 0.9.1.5.8.3.1
-toolkit: 0.9.1.5.8.2.4
+public-sdk: 0.9.1.5.8.3.6
+toolkit: 0.9.1.5.8.3.2
 
 ## Tech
 
