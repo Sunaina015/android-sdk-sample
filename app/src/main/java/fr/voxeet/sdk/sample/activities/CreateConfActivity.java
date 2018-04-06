@@ -10,7 +10,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
@@ -43,6 +42,7 @@ import fr.voxeet.sdk.sample.adapters.RecordedConferencesAdapter;
 import fr.voxeet.sdk.sample.application.SampleApplication;
 import fr.voxeet.sdk.sample.dialogs.ConferenceOutput;
 import fr.voxeet.sdk.sample.users.UsersHelper;
+import sdk.voxeet.com.toolkit.activities.workflow.VoxeetAppCompatActivity;
 import sdk.voxeet.com.toolkit.main.VoxeetToolkit;
 import sdk.voxeet.com.toolkit.views.uitookit.nologic.VideoView;
 import sdk.voxeet.com.toolkit.views.uitookit.sdk.VoxeetConferenceBarView;
@@ -67,7 +67,7 @@ import static android.view.View.VISIBLE;
 /**
  * Created by RomainBenmansour on 4/21/16.
  */
-public class CreateConfActivity extends AppCompatActivity {
+public class CreateConfActivity extends VoxeetAppCompatActivity {
 
     public static final String INVIT_EXTERNAL_IDS = "INVIT_EXTERNAL_IDS";
     private int action;
@@ -168,7 +168,7 @@ public class CreateConfActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch(item.getItemId()) {
+        switch (item.getItemId()) {
             case android.R.id.home:
                 finish();
                 return true;
@@ -270,13 +270,13 @@ public class CreateConfActivity extends AppCompatActivity {
 
             String confIdOrAlias = null;
 
-            if(getIntent().hasExtra("confAlias")) {
+            if (getIntent().hasExtra("confAlias")) {
                 confIdOrAlias = getIntent().getStringExtra("confAlias");
-            } else if(getIntent().hasExtra("conferenceId")){
+            } else if (getIntent().hasExtra("conferenceId")) {
                 confIdOrAlias = getIntent().getStringExtra("conferenceId");
             }
 
-            if(confIdOrAlias != null) {
+            if (confIdOrAlias != null) {
                 join(confIdOrAlias);
                 //displayJoin();
             } else {
@@ -313,7 +313,7 @@ public class CreateConfActivity extends AppCompatActivity {
             setTitle("Demo IConference");
 
             VoxeetToolkit.getInstance().getConferenceToolkit().demo();
-        } else if(getIntent().hasExtra("create")){
+        } else if (getIntent().hasExtra("create")) {
             action = MainActivity.CREATE;
 
             showProgress();
@@ -391,7 +391,7 @@ public class CreateConfActivity extends AppCompatActivity {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(final ConferenceJoinedSuccessEvent event) {
-        Log.d("CreateConfActivity", "ConferencejoinedSuccessEvent "+event.getConferenceId()+" "+event.getAliasId());
+        Log.d("CreateConfActivity", "ConferencejoinedSuccessEvent " + event.getConferenceId() + " " + event.getAliasId());
         hideProgress();
 
         leave.setVisibility(VISIBLE);
@@ -412,7 +412,7 @@ public class CreateConfActivity extends AppCompatActivity {
 
         List<String> external_ids = UsersHelper.getExternalIds(VoxeetPreferences.id());
 
-        VoxeetSdk.getInstance().getConferenceService().invite(null, external_ids);
+        VoxeetSdk.getInstance().getConferenceService().invite(external_ids);
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -427,7 +427,7 @@ public class CreateConfActivity extends AppCompatActivity {
         onConferenceEnding();
     }
 
-    private void    onConferenceEnding() {
+    private void onConferenceEnding() {
         VoxeetSdk.getInstance().unregister(CreateConfActivity.this);
 
         screenShare.unAttach(); // unattaching just in case
@@ -446,7 +446,7 @@ public class CreateConfActivity extends AppCompatActivity {
 
     @Subscribe
     public void onEvent(final ConferenceUserJoinedEvent event) {
-        Log.d("CreateConfActivity", "ConferenceUserJoinedEvent " + event.message() + " " + event.getUser().getUserInfo().getExternalId()+" "+event.getUser().isOwner());
+        Log.d("CreateConfActivity", "ConferenceUserJoinedEvent " + event.message() + " " + event.getUser().getUserInfo().getExternalId() + " " + event.getUser().isOwner());
         updateStreams(event.getUser(), event.getMediaStream());
     }
 

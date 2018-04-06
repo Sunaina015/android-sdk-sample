@@ -6,8 +6,6 @@ import android.support.annotation.NonNull;
 import android.support.multidex.MultiDex;
 import android.util.Log;
 
-//import com.voxeet.android.media.video.CameraEnumerationAndroid;
-
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -17,13 +15,17 @@ import java.util.List;
 
 import fr.voxeet.sdk.sample.BuildConfig;
 import fr.voxeet.sdk.sample.Recording;
+import fr.voxeet.sdk.sample.activities.IncomingCallActivity;
 import sdk.voxeet.com.toolkit.controllers.AbstractConferenceToolkitController;
 import sdk.voxeet.com.toolkit.main.VoxeetToolkit;
 import sdk.voxeet.com.toolkit.views.uitookit.sdk.overlays.OverlayState;
 import voxeet.com.sdk.core.VoxeetSdk;
+import voxeet.com.sdk.core.preferences.VoxeetPreferences;
 import voxeet.com.sdk.events.error.SdkLogoutErrorEvent;
 import voxeet.com.sdk.events.success.SdkLogoutSuccessEvent;
 import voxeet.com.sdk.json.UserInfo;
+
+//import com.voxeet.android.media.video.CameraEnumerationAndroid;
 
 /**
  * Created by RomainBenmansour on 06,April,2016
@@ -57,8 +59,10 @@ public class SampleApplication extends Application {
                 BuildConfig.CONSUMER_SECRET,
                 _current_user); //can be null - will be removed in a later version
 
+        VoxeetPreferences.setDefaultActivity(IncomingCallActivity.class.getCanonicalName());
         //register the Application and add at least one subscriber
         VoxeetSdk.getInstance().register(this, this);
+
 
         //it is possible to change the default camera the app will use when starting video recording
         //for instance with the front camera : - used by default

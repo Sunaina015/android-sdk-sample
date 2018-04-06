@@ -57,6 +57,7 @@
             android:theme="@style/AppTheme.NoActionBar"/>
 
         <activity android:name=".activities.TryoutActivity" />
+        <activity android:name=".activities.IncomingCallActivity" />
 
     </application>
 
