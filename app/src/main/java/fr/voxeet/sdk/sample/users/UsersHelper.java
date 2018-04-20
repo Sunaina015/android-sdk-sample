@@ -25,19 +25,19 @@ public class UsersHelper {
             new UserItem(R.drawable.team_thomas, new UserInfo("Thomas", "333", "https://cdn.voxeet.com/images/team-thomas.png"))
     };
 
-    public static List<String> getExternalIds(UserItem owner) {
+    public static List<UserInfo> getExternalIds(UserItem owner) {
         if (owner.getUserInfo() != null)
             return getExternalIds(owner.getUserInfo().getExternalId());
         return getExternalIds((String) null);
     }
 
-    public static List<String> getExternalIds(String owner) {
-        List<String> list = new ArrayList<>();
+    public static List<UserInfo> getExternalIds(String owner) {
+        List<UserInfo> list = new ArrayList<>();
 
         for (UserItem item : USER_ITEMS) {
             if (item.getUserInfo() != null) {
                 if (!item.getUserInfo().getExternalId().equals(owner)) {
-                    list.add(item.getUserInfo().getExternalId());
+                    list.add(item.getUserInfo());
                 }
             }
         }
