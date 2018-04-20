@@ -199,6 +199,43 @@ public class CreateConfActivity extends VoxeetAppCompatActivity {
         } else
             initConf();
     }
+    /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+     *
+     * Android calls management
+     *
+     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == CAMERA_REQUEST) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                initConf();
+            else {
+                Toast.makeText(this, "Camera permission required", Toast.LENGTH_SHORT).show();
+
+                finish();
+            }
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+//        if (VoxeetSdk.isSdkConferenceLive())
+//            displayLeaveDialog();
+//        else
+        super.onBackPressed();
+    }
+
+
+
+    /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+     *
+     * Interface calls management
+     *
+     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -364,7 +401,152 @@ public class CreateConfActivity extends VoxeetAppCompatActivity {
         join(editextConference.getText().toString());
     }
 
-    public void join(String confAlias) {
+    /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+     *
+     * Event calls management
+     *
+     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+
+    @Subscribe
+    public void onEvent(final ConferenceUserLeftEvent event) {
+        Log.d(TAG, "onEvent: " + event.getClass().getSimpleName());
+        adapter.removeParticipant(event.getUser());
+        adapter.notifyDataSetChanged();
+    }
+
+    @Subscribe
+    public void onEvent(final ConferenceUserJoinedEvent event) {
+        Log.d("CreateConfActivity", "ConferenceUserJoinedEvent " + event.message() + " " + event.getUser().getUserInfo().getExternalId() + " " + event.getUser().isOwner());
+        updateStreams(event.getUser(), event.getMediaStream());
+    }
+
+    @Subscribe
+    public void onEvent(final ConferenceUserUpdatedEvent event) {
+        Log.d(TAG, "onEvent: " + event.getClass().getSimpleName());
+        updateStreams(event.getUser(), event.getMediaStream());
+    }
+
+    @Subscribe
+    public void onEvent(ScreenStreamAddedEvent event) {
+        Log.d(TAG, "onEvent: " + event.getClass().getSimpleName());
+        MediaStream mediaStream = event.getMediaStream();
+        if (mediaStream != null && mediaStream.hasVideo()) { // attaching stream
+            screenShare.setVisibility(VISIBLE);
+            screenShare.attach(event.getPeer(), mediaStream);
+        }
+    }
+
+    @Subscribe
+    public void onEvent(RecordingStatusUpdateEvent event) {
+        Log.d(TAG, "onEvent: " + event.getClass().getSimpleName());
+        if (event.getRecordingStatus().equalsIgnoreCase(RecordingStatus.RECORDING.name())) {
+            ((SampleApplication) getApplication()).saveRecordingConference(new Recording(event.getConferenceId(), event.getTimeStamp()));
+
+            record.setText("Stop Recording");
+        } else {
+            record.setText("Start Recording");
+        }
+    }
+
+    @Subscribe
+    public void onEvent(ScreenStreamRemovedEvent event) { // unattaching stream
+        Log.d(TAG, "onEvent: " + event.getClass().getSimpleName());
+        screenShare.setVisibility(View.GONE);
+        screenShare.unAttach();
+    }
+
+    @Subscribe
+    public void onEvent(MessageReceived event) {
+        Log.e(TAG, event.getMessage());
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEvent(QualityIndicators event) {
+        Log.d(TAG, "onEvent: MOS := " + event.getMos());
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEvent(FilePresentationStartedEvent event) {
+        //You can override the event also here
+        //especially when the presentation was not started by the current user
+        onEvent(event.getEvent());
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEvent(FilePresentationStoppedEvent event) {
+        //You can override the event also here
+        //especially when the presentation was not started by the current user
+        onEvent(event.getEvent());
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEvent(FilePresentationUpdatedEvent event) {
+        onEvent(event.getEvent());
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEvent(final ConferenceJoinedSuccessEvent event) {
+        Log.d("CreateConfActivity", "ConferencejoinedSuccessEvent " + event.getConferenceId() + " " + event.getAliasId());
+        hideProgress();
+
+        leave.setVisibility(VISIBLE);
+
+        joinLayout.setVisibility(View.GONE);
+
+        conferenceOptions.setVisibility(VISIBLE);
+
+        if (action == MainActivity.DEMO || action == MainActivity.REPLAY) {
+            record.setVisibility(View.GONE);
+            video.setVisibility(View.GONE);
+        } else {
+            aliasId.setVisibility(VISIBLE);
+            aliasId.setText(event.getAliasId() != null ? event.getAliasId() : event.getConferenceId());
+
+            sendText.setVisibility(VISIBLE);
+        }
+
+        List<UserInfo> external_ids = UsersHelper.getExternalIds(VoxeetPreferences.id());
+
+        showStartPresentation();
+
+        VoxeetToolkit.getInstance().getConferenceToolkit()
+                .invite(external_ids)
+                .then(new PromiseExec<List<ConferenceRefreshedEvent>, Object>() {
+                    @Override
+                    public void onCall(@Nullable List<ConferenceRefreshedEvent> result, @NonNull Solver<Object> solver) {
+
+                    }
+                })
+                .error(new ErrorPromise() {
+                    @Override
+                    public void onError(Throwable error) {
+
+                    }
+                });
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEvent(final ConferenceLeftSuccessEvent event) {
+        Log.d(TAG, "onEvent: " + event.getClass().getSimpleName());
+        onConferenceEnding();
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEvent(final ConferenceEnded event) {
+        Log.d(TAG, "onEvent: " + event.getClass().getSimpleName());
+        onConferenceEnding();
+    }
+
+
+    /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+     *
+     * Internal calls management
+     *
+     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+
+    private void join(String confAlias) {
         if (!VoxeetSdk.getInstance().register(this, this)) {
             Toast.makeText(getApplicationContext(), getApplicationContext().getString(R.string.register_conf_error), Toast.LENGTH_SHORT).show();
             finish();
@@ -405,20 +587,6 @@ public class CreateConfActivity extends VoxeetAppCompatActivity {
         showProgress();
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        if (requestCode == CAMERA_REQUEST) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
-                initConf();
-            else {
-                Toast.makeText(this, "Camera permission required", Toast.LENGTH_SHORT).show();
-
-                finish();
-            }
-        }
-    }
 
     private void initConf() {
         if (getIntent().hasExtra("join")) {
@@ -507,14 +675,6 @@ public class CreateConfActivity extends VoxeetAppCompatActivity {
         joinLayout.setVisibility(VISIBLE);
     }
 
-    @Override
-    public void onBackPressed() {
-//        if (VoxeetSdk.isSdkConferenceLive())
-//            displayLeaveDialog();
-//        else
-        super.onBackPressed();
-    }
-
     private void displayLeaveDialog() {
         final AlertDialog alertDialog = new AlertDialog.Builder(this).create();
         alertDialog.setTitle(getString(R.string.leave_conference_title));
@@ -559,131 +719,6 @@ public class CreateConfActivity extends VoxeetAppCompatActivity {
         adapter.notifyDataSetChanged();
     }
 
-    public void onEvent(FilePresentationStarted event) {
-        if (null != event) {
-            if (mFilePresentationStarted == null || !event.getFileId().equals(mFilePresentationStarted.getFileId())) {
-                mFilePresentationStarted = event;
-                loadImageFromCurrentPresentation(mFilePresentationStarted.getPosition());
-
-                if (mFilePresentationStarted.isOwner()) {
-                    showNavigationButtons();
-                } else {
-                    hideNavigationButtons();
-                }
-            }
-        }
-    }
-
-    private void loadImageFromCurrentPresentation(int page) {
-        presentation_lander.setVisibility(View.VISIBLE);
-        Picasso.with(this)
-                .load(VoxeetSdk.getInstance()
-                        .getFilePresentationService()
-                        .getImageUrl(mFilePresentationStarted.getFileId(),
-                                page))
-                .into(presentation_lander);
-    }
-
-    public void onEvent(FilePresentationStopped event) {
-        if (null != event) {
-            mFilePresentationStarted = null;
-
-            presentation_lander.setVisibility(View.GONE);
-            hideButtonsPresentation();
-            hideNavigationButtons();
-        }
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEvent(FilePresentationStartedEvent event) {
-        //You can override the event also here
-        //especially when the presentation was not started by the current user
-        onEvent(event.getEvent());
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEvent(FilePresentationStoppedEvent event) {
-        //You can override the event also here
-        //especially when the presentation was not started by the current user
-        onEvent(event.getEvent());
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEvent(FilePresentationUpdatedEvent event) {
-        onEvent(event.getEvent());
-    }
-
-
-    public void onEvent(FilePresentationUpdated event) {
-
-        Log.d(TAG, "onEvent: " + mFilePresentationStarted.getFileId() + " " + event.getFileId()
-                + " " + mFilePresentationStarted.getPosition() + " " + event.getPosition());
-        if (null != event && null != mFilePresentationStarted
-                && mFilePresentationStarted.getFileId().equals(event.getFileId())
-                && mFilePresentationStarted.getPosition() != event.getPosition()) {
-            mFilePresentationStarted.setPosition(event.getPosition());
-
-            loadImageFromCurrentPresentation(mFilePresentationStarted.getPosition());
-
-            if (mFilePresentationStarted.isOwner()) {
-                showNavigationButtons();
-            }
-        }
-    }
-
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEvent(final ConferenceJoinedSuccessEvent event) {
-        Log.d("CreateConfActivity", "ConferencejoinedSuccessEvent " + event.getConferenceId() + " " + event.getAliasId());
-        hideProgress();
-
-        leave.setVisibility(VISIBLE);
-
-        joinLayout.setVisibility(View.GONE);
-
-        conferenceOptions.setVisibility(VISIBLE);
-
-        if (action == MainActivity.DEMO || action == MainActivity.REPLAY) {
-            record.setVisibility(View.GONE);
-            video.setVisibility(View.GONE);
-        } else {
-            aliasId.setVisibility(VISIBLE);
-            aliasId.setText(event.getAliasId() != null ? event.getAliasId() : event.getConferenceId());
-
-            sendText.setVisibility(VISIBLE);
-        }
-
-        List<UserInfo> external_ids = UsersHelper.getExternalIds(VoxeetPreferences.id());
-
-        showStartPresentation();
-
-        VoxeetToolkit.getInstance().getConferenceToolkit()
-                .invite(external_ids)
-                .then(new PromiseExec<List<ConferenceRefreshedEvent>, Object>() {
-                    @Override
-                    public void onCall(@Nullable List<ConferenceRefreshedEvent> result, @NonNull Solver<Object> solver) {
-
-                    }
-                })
-                .error(new ErrorPromise() {
-                    @Override
-                    public void onError(Throwable error) {
-
-                    }
-                });
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEvent(final ConferenceLeftSuccessEvent event) {
-        Log.d(TAG, "onEvent: " + event.getClass().getSimpleName());
-        onConferenceEnding();
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEvent(final ConferenceEnded event) {
-        Log.d(TAG, "onEvent: " + event.getClass().getSimpleName());
-        onConferenceEnding();
-    }
 
     private void onConferenceEnding() {
         VoxeetSdk.getInstance().unregister(CreateConfActivity.this);
@@ -695,60 +730,7 @@ public class CreateConfActivity extends VoxeetAppCompatActivity {
         finish();
     }
 
-    @Subscribe
-    public void onEvent(final ConferenceUserLeftEvent event) {
-        Log.d(TAG, "onEvent: " + event.getClass().getSimpleName());
-        adapter.removeParticipant(event.getUser());
-        adapter.notifyDataSetChanged();
-    }
-
-    @Subscribe
-    public void onEvent(final ConferenceUserJoinedEvent event) {
-        Log.d("CreateConfActivity", "ConferenceUserJoinedEvent " + event.message() + " " + event.getUser().getUserInfo().getExternalId() + " " + event.getUser().isOwner());
-        updateStreams(event.getUser(), event.getMediaStream());
-    }
-
-    @Subscribe
-    public void onEvent(final ConferenceUserUpdatedEvent event) {
-        Log.d(TAG, "onEvent: " + event.getClass().getSimpleName());
-        updateStreams(event.getUser(), event.getMediaStream());
-    }
-
-    @Subscribe
-    public void onEvent(ScreenStreamAddedEvent event) {
-        Log.d(TAG, "onEvent: " + event.getClass().getSimpleName());
-        MediaStream mediaStream = event.getMediaStream();
-        if (mediaStream != null && mediaStream.hasVideo()) { // attaching stream
-            screenShare.setVisibility(VISIBLE);
-            screenShare.attach(event.getPeer(), mediaStream);
-        }
-    }
-
-    @Subscribe
-    public void onEvent(RecordingStatusUpdateEvent event) {
-        Log.d(TAG, "onEvent: " + event.getClass().getSimpleName());
-        if (event.getRecordingStatus().equalsIgnoreCase(RecordingStatus.RECORDING.name())) {
-            ((SampleApplication) getApplication()).saveRecordingConference(new Recording(event.getConferenceId(), event.getTimeStamp()));
-
-            record.setText("Stop Recording");
-        } else {
-            record.setText("Start Recording");
-        }
-    }
-
-    @Subscribe
-    public void onEvent(ScreenStreamRemovedEvent event) { // unattaching stream
-        Log.d(TAG, "onEvent: " + event.getClass().getSimpleName());
-        screenShare.setVisibility(View.GONE);
-        screenShare.unAttach();
-    }
-
-    @Subscribe
-    public void onEvent(MessageReceived event) {
-        Log.e(TAG, event.getMessage());
-    }
-
-    public void showProgress() {
+    private void showProgress() {
         try {
             if (dialog != null)
                 return;
@@ -759,7 +741,7 @@ public class CreateConfActivity extends VoxeetAppCompatActivity {
         }
     }
 
-    public void hideProgress() {
+    private void hideProgress() {
         try {
             if (dialog != null) {
                 dialog.dismiss();
@@ -769,6 +751,13 @@ public class CreateConfActivity extends VoxeetAppCompatActivity {
             Log.e(TAG, "error", e.getCause());
         }
     }
+
+    /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+     *
+     * Internal calls management :: Presentation
+     *
+     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 
     private void showStartPresentation() {
         startPresentation.setVisibility(View.VISIBLE);
@@ -832,12 +821,59 @@ public class CreateConfActivity extends VoxeetAppCompatActivity {
                         showNavigationButtons();
                     }
                 });
-
-
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEvent(QualityIndicators event) {
-        Log.d(TAG, "onEvent: MOS := " + event.getMos());
+    private void onEvent(FilePresentationStarted event) {
+        if (null != event) {
+            if (mFilePresentationStarted == null || !event.getFileId().equals(mFilePresentationStarted.getFileId())) {
+                mFilePresentationStarted = event;
+                loadImageFromCurrentPresentation(mFilePresentationStarted.getPosition());
+
+                if (mFilePresentationStarted.isOwner()) {
+                    showNavigationButtons();
+                } else {
+                    hideNavigationButtons();
+                }
+            }
+        }
     }
+
+    private void loadImageFromCurrentPresentation(int page) {
+        presentation_lander.setVisibility(View.VISIBLE);
+        Picasso.with(this)
+                .load(VoxeetSdk.getInstance()
+                        .getFilePresentationService()
+                        .getImageUrl(mFilePresentationStarted.getFileId(),
+                                page))
+                .into(presentation_lander);
+    }
+
+    private void onEvent(FilePresentationStopped event) {
+        if (null != event) {
+            mFilePresentationStarted = null;
+
+            presentation_lander.setVisibility(View.GONE);
+            hideButtonsPresentation();
+            hideNavigationButtons();
+        }
+    }
+
+    private void onEvent(FilePresentationUpdated event) {
+
+        Log.d(TAG, "onEvent: " + mFilePresentationStarted.getFileId() + " " + event.getFileId()
+                + " " + mFilePresentationStarted.getPosition() + " " + event.getPosition());
+        if (null != event && null != mFilePresentationStarted
+                && mFilePresentationStarted.getFileId().equals(event.getFileId())
+                && mFilePresentationStarted.getPosition() != event.getPosition()) {
+            mFilePresentationStarted.setPosition(event.getPosition());
+
+            loadImageFromCurrentPresentation(mFilePresentationStarted.getPosition());
+
+            if (mFilePresentationStarted.isOwner()) {
+                showNavigationButtons();
+            }
+        }
+    }
+
+
 }
