@@ -278,6 +278,14 @@ Enables a view (VoxeetConferenceView) on top of your current view when joining/c
 VoxeetToolkit.getInstance().enableOverlay(boolean enable);
 ```
 
+### Enabling QualityIndicators
+
+```java
+VoxeetSdk.getInstance().getConferenceService().setStatEnabled()
+```
+
+Then, subscribe for the QualityIndicators event
+
 ### Creating a demo conference  
 
 ```java
@@ -507,6 +515,16 @@ public UserInfo getUserInfo();
 ## Events
 
 The SDK will dispatch events to the suscribed classes such as activities and fragments holding the conferences. To get notified, the only necessary step is to add those methods below:
+
+
+### Conference QualityIndicators success
+
+```java
+@Subscribe
+public void onEvent(final QualityIndicators event) {
+    //the event can be managed here
+}
+```
 
 ### Conference creation success
 
