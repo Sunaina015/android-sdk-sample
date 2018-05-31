@@ -20,17 +20,17 @@ To install the SDK directly into your Android project using the Grade build syst
 
 ```gradle
 dependencies {
-  compile ('com.voxeet.sdk:toolkit:1.0') {
+  compile ('com.voxeet.sdk:toolkit:1.0.4') {
     transitive = true
   }
 }
 ```
 
-The current sdk is available using the following version (used by the current toolkit version) :
+The current logic-only (no UI) sdk is available using the following version (used by the current toolkit version) :
 
 ```gradle
 dependencies {
-  compile ('com.voxeet.sdk:public-sdk:1.0.1') {
+  compile ('com.voxeet.sdk:public-sdk:1.0.4') {
     transitive = true
   }
 }
@@ -49,6 +49,19 @@ SDK.method.call()
 A complete documentation about the Promise implementation is available on this [Github](https://github.com/codlab/android_promise)
 
 ### What's New ?
+
+v1.0.4 :
+  - upgrade api calls
+  - fix issue with answers
+  - fix conference alias in history
+
+v1.0.3 :
+  - initialize Promises during the Voxeet initialization
+
+v1.0.2 :
+  - fix CTA
+  - fix issue with crash on same calls
+  - fix controllers behaviour
 
 v1.0 :
   - complete rework of most internal method
@@ -271,13 +284,13 @@ VoxeetSdk.getInstance().logUser(user_info);
 VoxeetSdk.getInstance().logout();
 ```
 
+
 ### Enabling / Disabling the Voxeet overlay
 Enables a view (VoxeetConferenceView) on top of your current view when joining/creating a conference and will allow you to manage the current conference easily and in a stylish fashion. It regroups many objects from the Voxeet UI toolkit. Can be turned on/off at any point in time.
 
 ```java
 VoxeetToolkit.getInstance().enableOverlay(boolean enable);
 ```
-
 ### Enabling QualityIndicators
 
 ```java
@@ -525,6 +538,7 @@ public void onEvent(final QualityIndicators event) {
     //the event can be managed here
 }
 ```
+
 
 ### Conference creation success
 
@@ -876,8 +890,8 @@ Only one instance of a conference is allowed to be live. Leaving the current con
 ## Version
 
 
-public-sdk: 1.0.1
-toolkit: 1.0
+public-sdk: 1.0.4
+toolkit: 1.0.4
 
 ## Tech
 
