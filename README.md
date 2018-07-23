@@ -20,7 +20,7 @@ To install the SDK directly into your Android project using the Grade build syst
 
 ```gradle
 dependencies {
-  compile ('com.voxeet.sdk:toolkit:1.0.4') {
+  compile ('com.voxeet.sdk:toolkit:1.1.0') {
     transitive = true
   }
 }
@@ -30,7 +30,7 @@ The current logic-only (no UI) sdk is available using the following version (use
 
 ```gradle
 dependencies {
-  compile ('com.voxeet.sdk:public-sdk:1.0.4') {
+  compile ('com.voxeet.sdk:public-sdk:1.1.0') {
     transitive = true
   }
 }
@@ -50,6 +50,12 @@ A complete documentation about the Promise implementation is available on this [
 
 ### What's New ?
 
+v1.1.0 :
+  - various fixes (issue with speaker button)
+  - add screenshare capabilities
+  - easier integration
+  - dual initialization mode (keys or oauth)
+
 v1.0.4 :
   - upgrade api calls
   - fix issue with answers
@@ -68,7 +74,7 @@ v1.0 :
   - File Presentation management (start, stop, update)
   - event on QualityIndicators with MOS
 
-  
+
 ## Usage
 
 ### Recommended settings for API compatibility:
@@ -183,687 +189,1008 @@ A logger has been added to the SDK allowing users to track events more easily. 3
 
 Please also note that WebRTC has its own logger for WebRTC related events.
 
-## Available methods
+---
+title: Android SDK Reference
+date: 2018/7/12 16:30:00
+updated:
+categories:
+  - reference
+tags: android
+permalink:
+---
 
-### Initializing  
+## Initialize the Voxeet SDK
 
+Two methods are currently available to initialize the SDK
+- Set the Api Keys in the APP
+- Use an Oauth2 server to provide the keys
+
+### `initialize` with keys
+Initializes the SDK with your Voxeet user information.
+
+#### Parameters
+-   `context` **ApplicationContext** - A NonNull ApplicationContext.
+-   `consumerKey` **string** - The consumer key for your app from [your developer account dashboard](https://developer.voxeet.com).
+-   `consumerSecret` **string** - The consumer secret for your app from [your developer account dashboard](https://developer.voxeet.com).
+-   `userInfo` **object** - A Nullable UserInfo object that contains custom user information.
+    -   `userInfo.name` **string** - The user name.
+    -   `userInfo.externalId` **string** - An external ID for the user.
+    -   `userInfo.avatarUrl` **string** - An avatar URL for the user.
+
+#### Example
 ```java
-// To be called from the application class
-
-// if you have external info
 UserInfo externalInfo = new UserInfo(externalName, externalName, externalPhotoUrl);
-// else
-UserInfo externalInfo = new UserInfo();
 
-VoxeetSdk.sdkInitialize(this, consumerKey, consumerSecret, externalInfo);
-
-// Set Default activity to launch when receiving notifications if enabled
-VoxeetSdk.setDefaultActivity(YourIncomingCall.class.getCanonicalName());
-
-// Set a timer to stop the conference if none has joined it at the end of the defined timeout
-VoxeetSdk.getInstance().getConferenceService().setTimeOut(45000);
-
-// requires the voxeet toolkit lib in the gradle app file
-VoxeetToolkit.initialize(this, EventBus.getDefault());
-VoxeetToolkit.getInstance().enableOverlay(true);
+VoxeetSdk.sdkInitialize(context, consumerKey, consumerSecret, externalInfo);
 ```
 
-### Incoming Calls
+### `initialize` with Oauth2
+Initializes the SDK with a valid token and a method to refresh it.
 
-The new workflow to receive incoming calls has been updated.
+#### Parameters
+-   `context` **ApplicationContext** - A NonNull ApplicationContext.
+-   `tokenAccess` **string** - A valid tokenAccess obtained from your own Oauth2 server.
+-   `consumerSecret` **callable<string>** - A callback which will return a valid tokenAccess when called from the SDK.
+-   `userInfo` **object** - A Nullable UserInfo object that contains custom user information.
+    -   `userInfo.name` **string** - The user name.
+    -   `userInfo.externalId` **string** - An external ID for the user.
+    -   `userInfo.avatarUrl` **string** - An avatar URL for the user.
 
-You can now have the following implementations to do in order to have invitations :
+#### Example
+```java
+UserInfo externalInfo = new UserInfo(externalName, externalName, externalPhotoUrl);
 
-- make every Activity extends `VoxeetAppCompatActivity`
-VoxeetAppCompatActivity will manage and call the proper methods to join a conference if detected
+Callable<String> tokenRefresh = new Callable<String>() {
+    @Override
+    public String call() throws Exception {
+        //retrofitService is a valid proxy object from a Retrofit interface
+        return retrofitService.toBlocking().single();
+    }
+};
 
-- For push notification or in SDK, register an Activity which extends `AbstractIncomingCallActivity`
+VoxeetSdk.sdkInitialize(context, tokenAccess, tokenRefresh, externalInfo);
 ```
-VoxeetPreferences.setDefaultActivity(IncomingCallActivity.class.getCanonicalName());
+
+
+### `register`
+Registers your app with the SDK.
+
+
+#### Parameters
+-   `context` **context** - A NonNull Context.
+-   `object`  **object** - An object which will receive EventBus events
+
+```
+VoxeetSdk.getInstance().register(context, object);
 ```
 
-In this snippet, `IncomingCallActivity` extends `AbstractIncomingCallActivity`. A method must be overriden :
+#### Parameters
+-   `context` **context** - A NonNull context.
+-   `object` **object** - An object that will receive EventBus messages.
+
+
+## Conferences
+Main access: `VoxeetSdk.getInstance().getConferenceService()`
+
+
+### `create`
+Creates a conference.
+
+#### Returns
+`Promise<status: Boolean | Error>` - The conference is created
+
+#### Example
+```java
+VoxeetSdk.getInstance().getConferenceService().create()
+                .then(new PromiseExec<Boolean, Object>() {
+                    @Override
+                    public void onCall(@Nullable Boolean aBoolean, @NonNull Solver<Object> solver) {
+
+                    }
+                })
+                .error(new ErrorPromise() {
+                    @Override
+                    public void onError(@NonNull Throwable throwable) {
+
+                    }
+                });
 ```
-@NonNull
+
+### `join`
+Joins a conference. If the conference doesn't exist, it is created.
+
+**If you previously used `create`, the conference parameters in the `joinConference` object
+are ignored.**
+
+#### Parameters
+-   `conference` **string** - The ID or alias of the conference to join.
+
+#### Returns
+`Promise<status: Boolean | Error>` - The conference is joined
+
+#### Example
+```java
+VoxeetSdk.getInstance().getConferenceService().join(conferenceAlias)
+                .then(new PromiseExec<Boolean, Object>() {
+                    @Override
+                    public void onCall(@Nullable Boolean aBoolean, @NonNull Solver<Object> solver) {
+
+                    }
+                })
+                .error(new ErrorPromise() {
+                    @Override
+                    public void onError(@NonNull Throwable throwable) {
+
+                    }
+                });
+```
+
+
+### `leaveConference`
+Leaves the currently running conference.
+
+#### Returns
+`Promise<status: Boolean | ConferenceLeftError>` - The conference is left or an error occured
+
+If an error occurs, the session is properly left in the client. There is no need to recheck the `leaveConference` status.
+
+#### Example
+```java
+VoxeetSdk.getInstance().getConferenceService().leave()
+                .then(new PromiseExec<Boolean, Object>() {
+                    @Override
+                    public void onCall(@Nullable Boolean aBoolean, @NonNull Solver<Object> solver) {
+
+                    }
+                })
+                .error(new ErrorPromise() {
+                    @Override
+                    public void onError(@NonNull Throwable throwable) {
+
+                    }
+                });
+```
+
+
+### `listenConference`
+Listen to a conference without sharing your audio or video.
+
+#### Parameters
+-   `conference` **string** - The ID or alias of the conference to listen to.
+
+#### Returns
+`Promise<status: Boolean | InConferenceException | PromiseConferenceJoinedErrorException>` - The conference is joined in listener mode
+
+#### Example
+```java
+VoxeetSdk.getInstance().getConferenceService().listenConference(conferenceAlias)
+                .then(new PromiseExec<Boolean, Object>() {
+                    @Override
+                    public void onCall(@Nullable Boolean aBoolean, @NonNull Solver<Object> solver) {
+
+                    }
+                })
+                .error(new ErrorPromise() {
+                    @Override
+                    public void onError(@NonNull Throwable throwable) {
+
+                    }
+                });
+```
+
+
+## Replay conferences
+
+
+### `replayConference`
+Replays a recorded conference.
+
+#### Parameters
+-   `conferenceId` **string** - The ID of the conference you want to replay.
+
+#### Returns
+`Promise<status: Boolean>` - The conference replay is starting
+
+#### Example
+```java
+VoxeetSdk.getInstance().getConferenceService().listenConference(conferenceAlias)
+                .then(new PromiseExec<Boolean, Object>() {
+                    @Override
+                    public void onCall(@Nullable Boolean aBoolean, @NonNull Solver<Object> solver) {
+
+                    }
+                })
+                .error(new ErrorPromise() {
+                    @Override
+                    public void onError(@NonNull Throwable throwable) {
+
+                    }
+                });
+```
+
+
+## Record conferences
+
+
+### `startRecording`
+Records the current conference so you can replay it after it ends.
+
+#### Returns
+`Promise<status: Boolean | Exception>` - Resolve if no network error occured
+
+#### Example
+```java
+VoxeetSdk.getInstance().getConferenceService().startRecording()
+                .then(new PromiseExec<Boolean, Object>() {
+                    @Override
+                    public void onCall(@Nullable Boolean aBoolean, @NonNull Solver<Object> solver) {
+
+                    }
+                })
+                .error(new ErrorPromise() {
+                    @Override
+                    public void onError(@NonNull Throwable throwable) {
+
+                    }
+                });
+```
+
+
+### `stopRecording`
+Stops the current recording.
+
+#### Returns
+`Promise<status: Boolean | Exception>` - Resolve if no network error occured
+
+#### Example
+```java
+VoxeetSdk.getInstance().getConferenceService().stopRecording()
+                .then(new PromiseExec<Boolean, Object>() {
+                    @Override
+                    public void onCall(@Nullable Boolean aBoolean, @NonNull Solver<Object> solver) {
+
+                    }
+                })
+                .error(new ErrorPromise() {
+                    @Override
+                    public void onError(@NonNull Throwable throwable) {
+
+                    }
+                });
+```
+
+
+## Audio and video devices
+Main access: `VoxeetSdk.getInstance().getConferenceService()`
+
+
+### `getAvailableRoutes`
+Retrieves the available routes the SDK can use.
+
+#### Returns
+`List<Media.AudioRoute>` - A list of every AudioRoute.
+
+#### Example
+```java
+List<Media.AudioRoute> routes = VoxeetSdk.getInstance().getConferenceService().getAvailableRoutes();
+```
+
+
+### `getNameOfFrontFacingDevice`
+Retrieves the name of the front-facing camera.
+
+#### Returns
+`String?` - The name of the device (or "null" if unavailable).
+
+#### Example
+```java
+String front = CameraEnumerationAndroid.getNameOfBackFacingDevice();
+```
+
+
+### `getNameOfBackFacingDevice`
+Retrieves the name of the back-facing camera.
+
+#### Returns
+`String?` - The name of the device (or "null" if unavailable).
+
+#### Example
+```java
+String back = CameraEnumerationAndroid.getNameOfBackFacingDevice();
+```
+
+
+### `setDefaultCamera`
+Sets the camera device to use during the conference.
+
+**The device must be set before starting the video.**
+
+#### Parameters
+-   `cameraName` **string** - The name of the camera device to use.
+
+#### Example
+```java
+VoxeetSdk.getInstance().getConferenceService()
+    .setDefaultCamera(CameraEnumerationAndroid.getNameOfBackFacingDevice());
+```
+
+### `setAudioRoute`
+Sets the AudioRoute to use when the conference is already started.
+
+**The conference must be started to use this method.**
+
+#### Parameters
+-   `audioRoute` **Media.AudioRoute** - The valid AudioRoute to use.
+
+#### Returns
+`boolean` - Returns whether the output can be changed.
+
+#### Example
+```java
+VoxeetSdk.getInstance().getConferenceService()
+    .setAudioRoute(Media.AudioRoute.ROUTE_SPEAKER);
+```
+
+### `mute`
+Mute the microphone currently in use in the conference.
+
+**The conference must be started to use this method.**
+
+#### Parameters
+-   `state` **Boolean** - If true, the microphone is currently muted. Otherwise, false.
+
+#### Returns
+`boolean` - Returns whether the microphone is mute.
+
+#### Example
+```java
+VoxeetSdk.getInstance().getConferenceService()
+    .muteConference(true);
+```
+
+
+### `muteUser`
+Mutes or unmutes the specified user.
+
+**The conference must be started to use this method.**
+
+#### Parameters
+-   `userId` **string** - The ID of the user you want to mute or unmute.
+-   `state` **Boolean** - `true` if the user is muted. Otherwise, `false`.
+
+#### Returns
+`boolean` - Returns whether the user is muted or unmuted.
+
+#### Example
+```java
+String userId = "d0d237d9-1b1a-47b4-8fae-ae9cb3ce20c9";
+
+VoxeetSdk.getInstance().getConferenceService().muteUser(userId, true);
+```
+
+
+### `isVideoOn`
+Checks whether the video (camera) is turned on.
+
+**The conference must be started to use this method.**
+
+#### Returns
+`boolean` - Returns whether the current camera is turned on.
+
+#### Example
+```java
+boolean video_on = VoxeetSdk.getInstance().getConferenceService().isVideoOn();
+```
+
+
+### `startVideo`
+Starts the selected or default video (camera).
+
+**The conference must be started to use this method.**
+
+#### Returns
+`Promise<Boolean | Exception>` - Returns a Promise to resolve with the result.
+
+#### Example
+```java
+VoxeetSdk.getInstance().getConferenceService().startVideo()
+                .then(new PromiseExec<Boolean, Object>() {
+                    @Override
+                    public void onCall(@Nullable Boolean aBoolean, @NonNull Solver<Object> solver) {
+
+                    }
+                })
+                .error(new ErrorPromise() {
+                    @Override
+                    public void onError(@NonNull Throwable throwable) {
+
+                    }
+                });
+```
+
+
+### `stopVideo`
+Stops the current video (camera).
+
+**The conference must be started to use this method.**
+
+#### Returns
+`Promise<Boolean | Exception>` - Returns a Promise to resolve with the result.
+
+#### Example
+```java
+VoxeetSdk.getInstance().getConferenceService().stopVideo()
+                .then(new PromiseExec<Boolean, Object>() {
+                    @Override
+                    public void onCall(@Nullable Boolean aBoolean, @NonNull Solver<Object> solver) {
+
+                    }
+                })
+                .error(new ErrorPromise() {
+                    @Override
+                    public void onError(@NonNull Throwable throwable) {
+
+                    }
+                });
+```
+
+
+### `switchCamera`
+Changes the device camera (front to back or back to front).
+
+**The conference must be started to use this method.**
+
+#### Returns
+`Promise<Boolean | Exception>` - Returns a Promise to resolve with the result.
+
+#### Example
+```java
+VoxeetSdk.getInstance().getConferenceService().switchCamera()
+                .then(new PromiseExec<Boolean, Object>() {
+                    @Override
+                    public void onCall(@Nullable Boolean aBoolean, @NonNull Solver<Object> solver) {
+
+                    }
+                })
+                .error(new ErrorPromise() {
+                    @Override
+                    public void onError(@NonNull Throwable throwable) {
+
+                    }
+                });
+```
+
+
+## Manage users
+
+
+### `invite`
+Invites a list of users to the current conference.
+
+**The conference must be started to use this method.**
+
+#### Parameters
+-   `ids` **List<String>** - A valid list of IDs for users to invite. The list can be empty.
+
+#### Returns
+`Promise<List<ConferenceRefreshedEvent> | Exception>` - Returns a Promise to resolve with the result for each user ID.
+
+#### Example
+```java
+List<String> ids = new ArrayList();
+ids.add("c55754af-eb79-42bf-8205-142660e34610");
+
+VoxeetSdk.getInstance().getConferenceService().invite(ids)
+                .then(new PromiseExec<Boolean, Object>() {
+                    @Override
+                    public void onCall(@Nullable List<ConferenceRefreshedEvent> refreshed_list, @NonNull Solver<Object> solver) {
+
+                    }
+                })
+                .error(new ErrorPromise() {
+                    @Override
+                    public void onError(@NonNull Throwable throwable) {
+
+                    }
+                });
+```
+
+
+### `setUserPosition`
+Sets user position for the spatialized audio mode.
+
+**The conference must be started to use this method.**
+
+#### Parameters
+-   `id` **string** - The ID for the user whose position you want to set.
+-   `angle` **double** - The user's X position. Must be a value between `-1.0` and `1.0`.
+-   `distance` **double** - The user's Y position. Must be a value between `0.0` and `1.0`.
+
+#### Returns
+`boolean` - Returns true if the user's position was successfully changed. Otherwise, false.
+
+#### Example
+```java
+VoxeetSdk.getInstance().getConferenceService().setUserPosition(ids, 3*Math.PI/4, 12);
+```
+
+
+### `getPeerVuMeter`
+Retrieves the current VU value for the specified user.
+
+**The conference must be started to use this method.**
+
+#### Parameters
+ -   `id` **String** - The ID for the user whose VU value you want to retrieve.
+
+#### Returns
+`int` - Returns the user's current VU value.
+
+#### Example
+```java
+int value = VoxeetSdk.getInstance().getConferenceService().getPeerVuMeter("c55754af-eb79-42bf-8205-142660e34610");
+```
+
+
+## Broadcast messages
+
+
+### `sendConferenceMessage`
+Broadcasts message to all conference participants.
+
+#### Parameters
+-   `message` **string** - The message to broadcast.
+
+#### Returns
+`Promise<status: Boolean | Exception>` - Resolve the current message status.
+
+#### Example
+```java
+VoxeetSdk.getInstance().getConferenceService().sendBroadcastMessage(message)
+                .then(new PromiseExec<Boolean, Object>() {
+                    @Override
+                    public void onCall(@Nullable Boolean aBoolean, @NonNull Solver<Object> solver) {
+
+                    }
+                })
+                .error(new ErrorPromise() {
+                    @Override
+                    public void onError(@NonNull Throwable throwable) {
+
+                    }
+                });
+```
+
+
+## File-sharing
+
+
+### `convertFile`
+Converts files users select through an input file box.
+
+#### Parameters
+-   `file` **file** - A file object.
+
+#### Returns
+`Promise<status: FilePresentationConverted | Exception>` - Retrieves a representation of the converted file.
+
+#### Example
+```java
+VoxeetSdk.getInstance().getFilePresentationService().convertFile(file)
+                .then(new PromiseExec<FilePresentationConverted, Object>() {
+                    @Override
+                    public void onCall(@Nullable FilePresentationConverted converted_object, @NonNull Solver<Object> solver) {
+
+                    }
+                })
+                .error(new ErrorPromise() {
+                    @Override
+                    public void onError(@NonNull Throwable throwable) {
+
+                    }
+                });
+```
+
+
+### `startPresentation`
+Starts a file presentation.
+
+#### Parameters
+-   `file` **file** - A file object.
+-   `position` **integer** - The page in the file to present.
+
+#### Returns
+`Promise<status: FilePresentationStarted | Exception>` - Presentation started or exception.
+
+#### Example
+```java
+VoxeetSdk.getInstance().getFilePresentationService().startFilePresentation(converted_file)
+                .then(new PromiseExec<FilePresentationStarted, Object>() {
+                    @Override
+                    public void onCall(@Nullable FilePresentationStarted started_object, @NonNull Solver<Object> solver) {
+
+                    }
+                })
+                .error(new ErrorPromise() {
+                    @Override
+                    public void onError(@NonNull Throwable throwable) {
+
+                    }
+                });
+```
+
+### `updatePresentation`
+Updates the current file presentation.
+
+#### Parameters
+-   `fileId` **string** - The ID of the file to update.
+-   `offset` **integer** - The new page to present.
+
+#### Returns
+`Promise<status: FilePresentationUpdated | Exception>` - The presentation updated.
+
+#### Example
+```java
+VoxeetSdk.getInstance().getFilePresentationService().updateFilePresentation(fileId)
+                .then(new PromiseExec<FilePresentationUpdated, Object>() {
+                    @Override
+                    public void onCall(@Nullable FilePresentationUpdated updated_presentation, @NonNull Solver<Object> solver) {
+
+                    }
+                })
+                .error(new ErrorPromise() {
+                    @Override
+                    public void onError(@NonNull Throwable throwable) {
+
+                    }
+                });
+```
+
+
+### `stopPresentation`
+Stops the current file presentation.
+
+#### Parameters
+-   `fileId` **string** - The ID of the file you want to stop presenting.
+
+#### Returns
+`Promise<status: FilePresentationStopped | Exception>` - Presentation stopped or exception.
+
+#### Example
+```java
+VoxeetSdk.getInstance().getFilePresentationService().stopFilePresentation(fileId)
+                .then(new PromiseExec<FilePresentationStopped, Object>() {
+                    @Override
+                    public void onCall(@Nullable FilePresentationStopped stopped_object, @NonNull Solver<Object> solver) {
+
+                    }
+                })
+                .error(new ErrorPromise() {
+                    @Override
+                    public void onError(@NonNull Throwable throwable) {
+
+                    }
+                });
+```
+
+
+### `getThumbnail`
+Retrieves a thumbnail image URL for a file page.
+
+#### Parameters
+-   `fileId` **string** - The ID for the corresponding file.
+-   `pageNumber` **integer** - The file page number to retrieve.
+
+#### Returns
+`String` - The valid URL.
+
+#### Example
+```java
+String thumbnail_url = VoxeetSdk.getInstance().getFilePresentationService().getThumbnail(fileId, pageId);
+```
+
+
+### `getImage`
+Retrives an image for a file page.
+
+#### Parameters
+-   `fileId` **string** - The ID for the corresponding file.
+-   `pageNumber` **integer** - The file page number to retrieve.
+
+#### Returns
+`String` - The valid URL.
+
+#### Example
+```java
+String image_url = VoxeetSdk.getInstance().getFilePresentationService().getImage(fileId, pageId);
+```
+
+
+## ScreenShare
+Main access: `VoxeetSdk.getInstance().getScreenShareService()`
+
+### `startScreenShare`
+Start a screen share from an `Intent` received from the system authorization popup.
+
+Note that to make this the easiest integration process, every `Activity` from your app should extends `VoxeetAppCompatActivity` (available in the SDK Toolkit) which manage the result from the user's approval. If you prefer handling those steps by yourself, you can refer to the [Google Sample](https://github.com/googlesamples/android-ScreenCapture/tree/master/Application/src/main/java/com/example/android/screencapture).
+
+#### Parameters
+-   `intent` **intent** - The system authorization result.
+
+#### Returns
+`Promise<status: Boolean | Exception>` - Resolve the status after the user authorized the app.
+
+#### Example
+```java
+//in the Activity's onActivityResult callback
+mTemporaryIntent = data; //considering data is the 3rd parameter of onActivityResult
+...
+//After the activity's onResume() or super.onResume() has been called
+VoxeetSdk.getInstance().getScreenShareService().startScreenShare(mTemporaryIntent)
+                .then(new PromiseExec<Boolean, Object>() {
+                    @Override
+                    public void onCall(@Nullable Boolean aBoolean, @NonNull Solver<Object> solver) {
+
+                    }
+                })
+                .error(new ErrorPromise() {
+                    @Override
+                    public void onError(@NonNull Throwable throwable) {
+
+                    }
+                });
+```
+
+### `stopScreenShare`
+Stop a previously started session.
+
+#### Returns
+`Promise<status: Boolean | Exception>` - Resolve if the whole stop process has been stopped. It will at least stop locally.
+
+#### Example
+```java
+VoxeetSdk.getInstance().getScreenShareService().stopScreenShare()
+                .then(new PromiseExec<Boolean, Object>() {
+                    @Override
+                    public void onCall(@Nullable Boolean aBoolean, @NonNull Solver<Object> solver) {
+                      //here the whole server & local screen session are now ended
+                    }
+                })
+                .error(new ErrorPromise() {
+                    @Override
+                    public void onError(@NonNull Throwable throwable) {
+                      //here, at least the local screen share session is ended
+                    }
+                });
+```
+
+### `sendUserPermissionRequest`
+
+Given a specified `Activity`, this method will call the `MediaProjectionManager` available in `Android API 19+`.
+
+#### Parameters
+-   `activity` **activity** - The Activity from which the call must be done.
+
+#### Returns
+`boolean` - Return if the current `Android API level` is high enough.
+
+#### Example
+```java
+boolean permission_sent = VoxeetSdk.getInstance().getScreenShareService()
+    .sendUserPermissionRequest(mActivity);
+```
+
+### `sendRequestStartScreenShare`
+
+This method will emit a new `ScreenShareService.RequestScreenSharePermissionEvent` event. This event must be catch in the current `Activity` to trigger `VoxeetSdk.getInstance().getScreenShareService()
+                .sendUserPermissionRequest(**Activity**)`
+
+#### Example
+```java
+VoxeetSdk.getInstance().getScreenShareService().sendRequestStartScreenShare();
+```
+
+### `onActivityResult`
+
+This method will manage the `MediaProjectionManager` result available in the `Activity`'s `onActivityResult`. When it is called by an `Activity`, it will store the `Intent data` to help process it later before starting the `ScreenShare` session.
+
+#### Parameters
+-   `requestCode` **int** - The sub-`Activity` requested code.
+-   `resultCode` **int** - The result the sub-`Activity` sent.
+-   `data` **Intent** - Optional data information the sub-`Activity` sent.
+
+#### Returns
+`boolean` - Return if the various codes and data match a valid `ScreenShare` authorization.
+
+
+#### Example
+```java
 @Override
-protected Class<? extends VoxeetAppCompatActivity> getActivityClassToCall() {
-    return MainActivity.class;
+public boolean onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+  boolean managed = VoxeetSdk.getInstance().getScreenShareService()
+      .onActivityResult(requestCode, resultCode, data);
+
+  if(managed) {
+    Log.d(TAG, "The user granted the permission");
+    return true;
+  }
+
+  return super.onActivityResult(requestCode, resultCode, data);
 }
 ```
 
-Note that in the case of multiple Activities in the app, you can use the VoxeetAppCompatActivity to automatically register the activity to start when "accepting" a call.
-Instead of returning `MainActivity.class` in the sample, use `IncomingCallFactory.getAcceptedIncomingActivityKlass()`:
+### `consumeRightsToScreenShare`
 
-```
-@NonNull
-@Override
-protected Class<? extends VoxeetAppCompatActivity> getActivityClassToCall() {
-    VoxeetAppCompatActivity temp = IncomingCallFactory.getAcceptedIncomingActivityKlass();
+This method will consume any `awaiting` Intent data corresponding to a `ScreenShare` which have been manage by `onActivityResult`. It can be called from `Activity`'s `onResume` after the `super.onResume()` call has been made. When using the SDK Toolkit's `VoxeetAppCompatActivity`, this call and the previous calls are automatically managed if the Activities inherits this last class.
 
-    if(null != temp)
-        return temp;
-    
-    return MainActivity.class;
-}
-
-```
-
-
-
-
-### Registering the SDK
-
-Registering is mandatory before starting a conference or else it will crash. Since version 0.8.001, the context and the object subscribing to receive the conference events are now decoupled offering more flexibility.
-
+#### Example
 ```java
-// Susbcribe to the SDK events
-VoxeetSdk.register(Context context, Object subscriber);
-```
-
-### Unregistering the SDK
-
-It's important to use this method once the conference is ended and that you want to finish your current view/activiy/ fragment.
-
-```java
-// Unsusbcribe from the SDK events
-// Mandatory
-VoxeetSdk.unregister(Context context);
-```
-
-### Open Session
-
-```java
-// Open Sdk Session. Equivalent to login. Included in the initialize method. Use it after disconnecting or encountering an issue requiring to reidentify. (Opens the websocket if call is successful)
-VoxeetSdk.getInstance().logUser(user_info);
-```
-
-### Logout
-
-```java
-// Basic logout and socket disconnect
-VoxeetSdk.getInstance().logout();
-```
-
-
-### Enabling / Disabling the Voxeet overlay
-Enables a view (VoxeetConferenceView) on top of your current view when joining/creating a conference and will allow you to manage the current conference easily and in a stylish fashion. It regroups many objects from the Voxeet UI toolkit. Can be turned on/off at any point in time.
-
-```java
-VoxeetToolkit.getInstance().enableOverlay(boolean enable);
-```
-### Enabling QualityIndicators
-
-```java
-VoxeetSdk.getInstance().getConferenceService().setStatEnabled()
-```
-
-Then, subscribe for the QualityIndicators event
-
-### Creating a demo conference  
-
-```java
-VoxeetSdk.getInstance().getConferenceService().demo();
-```
-
-### Creating a conference  
-
-```java
-VoxeetSdk.getInstance().getConferenceService().create();
-```
-
-### Joining a conference
-
-```java
-// Used to join someone's conference otherwise joining is automatic
-// Joining a non-existing conference will create it
-VoxeetSdk.getInstance().getConferenceService().join(String conferenceId);
-```
-
-### Joining a conference as a listener (no camera nor microphone)
-
-```java
-VoxeetSdk.getInstance().getConferenceService().listenConference(String conferenceId);
-```
-
-### Leaving a conference  
-
-```java
-VoxeetSdk.getInstance().getConferenceService().leave();
-```
-
-### Toggling own video
-
-```java
-// if successful, a ConferenceUserUpdatedEvent will be posted with the mediastream updated
-VoxeetSdk.getInstance().getConferenceService().toggleVideo();
-```
-
-### Change the camera
-
-It is possible to set the default camera the app will use :
-
-```java
-VoxeetSdk.getInstance().getConferenceService().setDefaultCamera(String cameraName);
-```
-
-In this sample, the cameraName can be used with the following calls :
-
-```java
-CameraEnumerationAndroid.getNameOfBackFacingDevice();
-CameraEnumerationAndroid.getNameOfFrontFacingDevice();
-```
-
-When using the toolkit, note that a "clic" on the "self" video will trigger a switchCamera() :
-```java
-VoxeetSdk.getInstance().getConferenceService().switchCamera();
-```
-
-### Retrieving list of invited (not in the conference yet) users to the conference
-
-```java
-VoxeetSdk.getInstance().getConferenceService().getInvitedUsers();
-```
-
-### Enabling/disabling conference recording
-
-```java
-// if successful, a RecordingStatusUpdateEvent will be posted with the updated recording conference status
-VoxeetSdk.getInstance().getConferenceService().toggleRecording();
-```
-
-### Replaying a recorded conference
-
-```java
-VoxeetSdk.getInstance().getConferenceService().replay(String conferenceId, long offset_in_ms);
-```
-
-### Checking if a conference is live  
-
-```java
-VoxeetSdk.getInstance().getConferenceService().isLive();
-```
-
-### Changing user position  
-
-```java
-// Change user position using an angle and a distance
-// Values for x, y are between : x = [-1, 1] and y = [0, 1]
-VoxeetSdk.getInstance().getConferenceService().cheangePeerPosition(String userId, double x, double y);
-```
-
-### Sending message in a conference
-
-```java
-// Send messages such as JSON commands...
-VoxeetSdk.getInstance().getConferenceService().sendBroadcastMessage(String message);
-```
-
-### Getting current conference users
-
-```java
-VoxeetSdk.getInstance().getConferenceService().getConferenceUsers();
-```
-
-### Getting microphone state
-
-```java
-VoxeetSdk.getInstance().getConferenceService().isMuted();
-```
-
-### Muting microphone
-
-```java
-VoxeetSdk.getInstance().getConferenceService().muteConference(boolean mute);
-```
-
-### Muting user
-
-```java
-// Muting or unmmuting an user depending on the boolean value
-VoxeetSdk.getInstance().getConferenceService().muteUser(String userId, boolean mute);
-```
-
-### Checking if an user is muted
-
-```java
-VoxeetSdk.getInstance().getConferenceService().isUserMuted(String userId);
-```
-
-### Getting available audio routes
-
-```java
-// Get available audio routes
-VoxeetSdk.getInstance().getConferenceService().getAvailableRoutes();
-```
-
-### Getting current audio route
-
-```java
-VoxeetSdk.getInstance().getConferenceService().currentRoute();
-```
-
-### Setting audio route
-
-```java
-VoxeetSdk.getInstance().getConferenceService().setOutputRoute(AudioRoute route);
-```
-
-### Setting a timeout
-
-```java
-// Set a timer to stop the conference if none has joined it at the end of the defined timeout
-VoxeetSdk.getInstance().getConferenceService().setTimeout(45000);
-```
-
-### Attaching the media stream
-
-It is advised to use the VideoView object available in the SDK. Check the part about the Voxeet UI Toolkit below.
-
-```java
-// Attach the renderer to the media so we can get the rendering working
-VoxeetSdk.getInstance().getConferenceService().attachMediaStream(MediaStream stream, VideoRenderer.Callbacks render);
-```
-
-### Unattaching the media stream
-
-```java
-// Unattach the renderers to avoid leaks
-VoxeetSdk.getInstance().getConferenceService().unAttachMediaStream(MediaStream stream);
-```
-
-## SDK Initialization
-
-In this example, initialize the SDK in the onCreate() method of your custom application class:
-
-```java
-@Override
-public void onCreate() {
-    super.onCreate();
-
-    // if you have external info
-    //UserInfo externalInfo = new UserInfo(externalName, externalName, externalPhotoUrl);
-    // else
-    //UserInfo externalInfo = new UserInfo();
-
-    //init the SDK
-    VoxeetSdk.initialize(this,
-            BuildConfig.CONSUMER_KEY,
-            BuildConfig.CONSUMER_SECRET,
-            _current_user); //can be null - will be removed in a later version
-
-    //register the Application and add at least one subscriber
-    VoxeetSdk.getInstance().register(this, this);
-}
-```
-
-## Activity Structure
-
-In order to work properly, it is necessary to register and unregister the SDK respectively in the onCreate() and onDestroy() methods of your activity/fragment holding the conference.
-
-```java
-@Override
-
-protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-
-    VoxeetSdk.getInstance().register(getApplicationContext(), this);
-}
-
-@Override
-protected void onDestroy() {
-    VoxeetSdk.getInstance().unregister(this);  
-
-    super.onDestroy();
-}   
-```
-
-## ConferenceUser Model
-
-ConferenceUser model now has an userInfo object where infos are stored such as the external user id, the url avatar and display name. It has to be passed when initializing the sdk in the application class.
-
-```java
-public UserInfo getUserInfo();
+VoxeetSdk.getInstance().getScreenShareService().consumeRightsToScreenShare();
 ```
 
 ## Events
 
-The SDK will dispatch events to the suscribed classes such as activities and fragments holding the conferences. To get notified, the only necessary step is to add those methods below:
-
-
-### Conference QualityIndicators success
-
-```java
-@Subscribe
-public void onEvent(final QualityIndicators event) {
-    //the event can be managed here
-}
-```
-
-
-### Conference creation success
-
-```java
-@Subscribe
-public void onEvent(final ConferenceCreationSuccess event) {
-}
-```
-
-### Conference creation error
-
-```java
-@Subscribe
-public void onEvent(final ConferenceCreatedError event) {
-}
-```
-
-### Conference joined successfully
-
-```java
-@Subscribe
-public void onEvent(final ConferenceJoinedSuccessEvent event) {
-    // Action to be called when joining successfully the conference
-}
-```
-
-### Conference joined error
-
-```java
-@Subscribe
-public void onEvent(final ConferenceJoinedError event) {
-    // Action to be called if joining failed
-}
-```
-
-### Conference left success
-
-```java
-@Subscribe
-public void onEvent(final ConferenceLeftSuccessEvent event) {
-    // Action to be called when leaving successfully the conference
-}
-```
-
-### Conference left error
-
-```java
-@Subscribe
-public void onEvent(final ConferenceLeftError event) {
-    // Action to be called when leaving the conference failed
-}
-```
-
-### Conference ended
-
-```java
-@Subscribe
-public void onEvent(final ConferenceEnded event) {
-    // Action to be called when a conference has ended (typically a replay ending)
-}
-```
-
-### Conference user joined
-```java
-@Subscribe
-public void onEvent(final ConferenceUserJoinedEvent event) {
-    // Action to be called when a new participant joins the conference
-}
-```
-
-### Conference user updated
-```java
-@Subscribe
-public void onEvent(final ConferenceUserUpdatedEvent event) {
-    // Action to be called when a participant has been updated (e.g conference user's camera has been turned on/off)
-}
-```
-
-### Conference user left
-```java
-@Subscribe
-public void onEvent(final ConferenceUserLeftEvent event) {
-    // Action to be called when a participant has left (e.g unattaching mediastream if needed)
-}
-```
-
-### Screen stream added
-```java
-@Subscribe
-public void onEvent(final ScreenStreamAddedEvent event) {
-    // Action to be called when a screen share stream is available
-}
-```
 
-### Screen stream removed
-```java
-@Subscribe
-public void onEvent(final ScreenStreamRemovedEvent event) {
-    // Action to be called when a screen share stream is no longer available
-}
-```
+### Conference events
 
-### Recording conference status updated
-```java
-@Subscribe
-public void onEvent(final RecordingStatusUpdateEvent event) {
-    // Action to be called when the recording status has changed (RECORDING or NOT_RECORDING)
-}
-```
+#### `ConferenceCreationSuccess`
+Sent when the conference is successfully created.
 
-### Message received
-```java
-@Subscribe
-public void onEvent(MessageReceived event) {
-    // Action to be called when a message is received
-}
-```
+#### `ConferenceCreatedError`
+Sent when the conference creation fails.
 
-## MediaStream
+#### `ConferenceJoinedSuccessEvent`
+Sent when a user joins the conference.
 
-Present in the ConferenceUserJoinedEvent and ConferenceUserUpdatedEvent, this object is supposed to be attached/unattached from a renderer to display/hide a conference user video or screen share stream.
-It has a boolean flag called hasVideo set to true if the user associated with it is currently streaming his camera/screen. Set to false, it means the user is not streaming or has stopped streaming his camera/screen.
+#### `ConferenceJoinedError`
+Sent when a user could not join the conference.
 
-## Voxeet UI toolkit
+#### `ConferenceLeftSuccessEvent`
+Sent when a user leaves the conference.
 
-A few UI objects are available such as the VideoView made to ease up the use of mediastreams and many others. All of them have customizable attributes you can use programmaticaly or in the xml. Here is a comprehensive list:
+#### `ConferenceLeftError`
+Sent when a user leaves the conference, but with errors.
 
-### VoxeetConferenceView
+#### `ConferenceEndedEvent`
+Sent when the conference is ended.
 
-This view regroups all of the others custom components available. We will now go into further details about each one of them.
+#### `GetConferenceStatusErrorEvent`
+Sent when the conference status could not be retrieved.
 
-### VoxeetTimer
+#### `GetConferenceHistoryEvent`
+Sent with the history of the conference.
 
-It displays a timer for the conference which starts when you join the conference. Also shows a green light which turns to red when the conference is being recorded.
+#### `GetConferenceHistoryErrorEvent`
+Sent when the conference history could not be retrieved.
 
-```java
+#### `CameraSwitchSuccessEvent`
+Sent when a user's camera was successfully switched.
 
-  // indicator color when conference is being recorded
-  <attr name="recording_color" format="color" />
+#### `CameraSwitchErrorEvent`
+Sent when a user's camera could not be switched.
 
-  // indicator color when conference is live
-  <attr name="default_color" format="color" />
+#### `SubscribeConferenceEvent`
+Sent when a subscription to the specified conference is dispatched.
 
-  // indicator color when you not in a conference
-  <attr name="not_in_conference_color" format="color" />
+#### `SubscribeConferenceErrorEvent`
+Sent when a subscription to the specified conference could not be dispatched.
 
-  // text color of the timer
-  <attr name="text_color" format="color" />
+#### `UnSubscribeConferenceAnswerEvent`
+Sent when an unsubscribe request for the conference could not be dispatched.
 
-  // defines when the timer starts (when joining a conference or when the view is created...)
-  <attr name="timer_mode" format="integer" />
+#### `UnSubscribeConferenceAnswerEvent`
+Sent with an unsubscribe request answer.
 
-  // display indicator or not
-  <attr name="color_enabled" format="boolean" />
-```
+#### `SubscribeForCallConferenceAnswerEvent`
+Sent with a subscription for call answers.
 
-### VideoView
+#### `SubscribeForCallConferenceErrorEvent`
+Sent after a call subscription fails.
 
-This is the component used to display someone's stream. Two main methods are available to attach and unattach the different streams:
+#### `UnSubscribeFromConferenceAnswerEvent`
+Sent after a sucessful call unsubscribe request.
 
-```java
-// Sets the videoview's behavior when already attached. Should it auto attach or just stay attached to the previous stream.
- public void setAutoUnAttach(boolean autoUnAttach) {
-        this.autoUnAttach = autoUnAttach;
-}
-```
+#### `UnsubscribeFromCallConferenceErrorEvent`
+Sent after a call unsubscribe request fails.
 
-```java
-// Determines if the videovideo is already attached to a stream
- public boolean isAttached()
-```
+#### `SendBroadcastResultEvent`
+Sent with the result of a broadcast message.
 
-```java
-// Sets the videoview to mirrored or not depending on the boolean value
-public void getRenderer().setMirror(shouldBeMirrored);
+#### `QualityIndicators`
+Sent with the conference status.
 
-<attr name="mirrored" format="boolean" />
-```
+#### `ConferenceUserQualityUpdatedEvent`
+Sent with the quality of the specified user in the conference.
 
-```java
-// Attach the renderer to the media so we can get the rendering working
-public void attach(String peerId, MediaStream stream);
-```
 
-```java
-public void unAttach();
-```
+### Participant events
 
-### VoxeetIncomingCallButton
+#### `ConferenceUserJoinedEvent`
+Sent when a user joins the conference.
 
-Press and swipe out type of button used to answer/decline a call for example. Callback listener will be triggered if set when the swipe has reached the minimum distance.
+#### `ConferenceUserUpdatedEvent`
+Sent when a user is updated.
 
-```java
-public void setIncomingCallListener(IncomingCallListener listener)
-```
+#### `ConferenceUserLeftEvent`
+Sent when a user leaves the conference.
 
-```java
-<attr name="view_src" format="integer" />
-```
+#### `AddConferenceParticipantResultEvent`
+Sent when a specific user is added to the conference.
 
-### VoxeetCurrentSpeakerView
+#### `ConferenceRefreshedEvent`
+Sent when conference user information is refreshed.
 
-Displays the current speaker with it's avatar picture and a scaling circle representating it's current voice level.
+#### `ConferenceUsersInvitedEvent`
+Sent when the list of users is invited.
 
-```java
-<attr name="vu_meter_color" format="color" />
-```
+#### `ConferenceUserCallDeclinedEvent`
+Sent when a user declines the conference.
 
-### VoxeetVuMeter
+#### `DeclineConferenceResultEvent`
+Sent when the server declines a dispatch from the device.
 
-It's a part of the VoxeetCurrentSpeakerView mentionned above but can definitely work on it's own.
 
-```java
-<attr name="background_color" format="color" />
-```
+### Recording events
 
-## VoxeetConferenceBarView
+#### `StartRecordingResultEvent`
+Sent when the conference recording starts.
 
-Contains different buttons allowing you to manage the conference. Here are the different available buttons:
+#### `StopRecordingResultEvent`
+Sent when the conference recording stops.
 
-  - toggle own camera
-  - leave conference
-  - mute
-  - change audio output
-  - toggle conference recording
+#### `RecordingStatusUpdateEvent`
+Sent when the conference recording status is changed.
 
+#### `ReplayConferenceErrorEvent`
+Sent when the conference replay cannot start.
 
-All of them are supposed to have a default state as well as a selected state. Since (1.0.012) you can set your own drawables to the conference bar's buttons through the xml or by using one the following methods:
 
-```java
-public void setCameraSelector(Drawable drawable);
-public void setCameraSelector(int cameraSelector);
+### Video events
 
-public void setRecordSelector(Drawable drawable);
-public void setRecordSelector(int recordSelector);
+#### `StartVideoAnswerEvent`
+Sent when the video starts.
 
-public void setHangUpSelector(Drawable drawable);
-public void setHangUpSelector(int hangUpSelector);
+#### `StopVideoAnswerEvent`
+Sent when the video cannot start.
 
-public void setAudioSelector(Drawable drawable);
-public void setAudioSelector(int audioSelector);
 
-public void setMuteSelector(Drawable drawable);
-public void setMuteSelector(int muteSelector);
-```
+### Screen-sharing events
 
+#### `ScreenStreamAddedEvent`
+Sent when screen-sharing from another conference participant is received.
 
-```java
-// set your own selector to each button
-<attr name="mute_selector" format="integer" />
-<attr name="audio_selector" format="integer" />
-<attr name="hang_up_selector" format="integer" />
-<attr name="camera_selector" format="integer" />
-<attr name="record_selector" format="integer" />
-```
+#### `ScreenStreamRemovedEvent`
+Sent when screen-sharing from another participant stops.
 
-To hide/make visible buttons, here are the different methods:
 
-```java
-public void setDisplayRecord(boolean displayRecord);
+### Permissions events
 
-public void setDisplayAudio(boolean displayAudio);
+#### `PermissionRefusedEvent`
+Sent when the app should request a specific user permission.
 
-public void setDisplayMute(boolean displayMute);
 
-public void setDisplayCamera(boolean displayCamera);
+### User events
 
-public void setDisplayLeave(boolean displayLeave);
-```
+#### `SdkLogoutSuccessEvent`
+Sent when a user is successfully logged out from the SDK.
 
-```java
-<attr name="record_button" format="boolean" />
-<attr name="audio_button" format="boolean" />
-<attr name="mute_button" format="boolean" />
-<attr name="video_button" format="boolean" />
-<attr name="leave_button" format="boolean" />
-```
+#### `SdkLogoutErrorEvent`
+Sent in case of a logout with network issues.
 
-You can also use the builder provided, set the buttons order as you wish and finally add the conference bar programmatically:
+**In this case, the user can still receive push notifications in case of Firebase implementation.**
 
-```java
-FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
-        FrameLayout.LayoutParams.WRAP_CONTENT,
-        FrameLayout.LayoutParams.WRAP_CONTENT);
-         params.gravity = Gravity.BOTTOM | Gravity.CENTER;
 
-VoxeetConferenceBarView conferenceBarView = new VoxeetConferenceBarView.Builder()
-        .with(this)
-        .setLayoutParams(params)
-        .hangUp(R.drawable.selector_hangup, new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.e(TAG, "hangup");
-            }
-        }).mute(R.drawable.selector_mute, new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.e(TAG, "mute");
-            }
-        }).build();
+### File-sharing events
 
-addContentView(conferenceBarView, conferenceBarView.getLayoutParams());
-```
+#### `FileConvertedEvent`
+Sent when a file is converted.
 
-## VoxeetParticipantView
+#### `FilePresentationStartEvent`
+Sent when a file presentation is dispatched from the server.
 
-The participant view shows the current conference's participants. Also displays the users' cams when they are enabled. You can set a listener so you get notified when a participant is selected/unselected. This allows interactions with others views. You can check the VoxeetConferenceView which locks the currentSpeakerView when someone is selected.
+#### `FilePresentationStopEvent`
+Sent when a file presentation stops from the server.
 
-```java
-public void setParticipantListener(ParticipantViewListener listener)
-```
-
-```java
-<attr name="overlay_color" format="color" />
-<attr name="name_enabled" format="boolean" />
-<attr name="display_self" format="boolean" />
-```
-
-## VoxeetLoadingView
-
-A custom view designed to display an ongoing task like an outgoing/incoming call.
-
-```java
-<attr name="loading_color" format="color" />
-```
 
 ## Conference event flow
 
@@ -890,8 +1217,8 @@ Only one instance of a conference is allowed to be live. Leaving the current con
 ## Version
 
 
-public-sdk: 1.0.4
-toolkit: 1.0.4
+public-sdk: 1.1.0
+toolkit: 1.1.0
 
 ## Tech
 
