@@ -189,16 +189,6 @@ A logger has been added to the SDK allowing users to track events more easily. 3
 
 Please also note that WebRTC has its own logger for WebRTC related events.
 
----
-title: Android SDK Reference
-date: 2018/7/12 16:30:00
-updated:
-categories:
-  - reference
-tags: android
-permalink:
----
-
 ## Initialize the Voxeet SDK
 
 Two methods are currently available to initialize the SDK
@@ -230,7 +220,7 @@ Initializes the SDK with a valid token and a method to refresh it.
 #### Parameters
 -   `context` **ApplicationContext** - A NonNull ApplicationContext.
 -   `tokenAccess` **string** - A valid tokenAccess obtained from your own Oauth2 server.
--   `consumerSecret` **callable<string>** - A callback which will return a valid tokenAccess when called from the SDK.
+-   `tokenRefresh` **callable<string>** - A callback which will return a valid tokenAccess when called from the SDK.
 -   `userInfo` **object** - A Nullable UserInfo object that contains custom user information.
     -   `userInfo.name` **string** - The user name.
     -   `userInfo.externalId` **string** - An external ID for the user.
@@ -244,7 +234,7 @@ Callable<String> tokenRefresh = new Callable<String>() {
     @Override
     public String call() throws Exception {
         //retrofitService is a valid proxy object from a Retrofit interface
-        return retrofitService.toBlocking().single();
+        return retrofitService.refreshToken().toBlocking().single();
     }
 };
 
