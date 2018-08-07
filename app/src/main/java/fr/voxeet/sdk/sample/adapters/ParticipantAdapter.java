@@ -128,7 +128,7 @@ public class ParticipantAdapter extends BaseAdapter {
         if (mediaStreamMap != null && mediaStreamMap.containsKey(user.getUserId())) {
             MediaStream mediaStream = mediaStreamMap.get(user.getUserId());
             if (mediaStream != null) {
-                if (mediaStream.hasVideo()) {
+                if (mediaStream.videoTracks().size() > 0) {
                     holder.avatar.setVisibility(View.VISIBLE);
                     holder.avatar.attach(user.getUserId(), mediaStreamMap.get(user.getUserId()));
                 } else {
@@ -199,7 +199,7 @@ public class ParticipantAdapter extends BaseAdapter {
 
         positionMap.put(userId, new RoomPosition(angle, distance));
 
-        VoxeetSdk.getInstance().getConferenceService().changePeerPosition(userId, angle, distance);
+        VoxeetSdk.getInstance().getConferenceService().setUserPosition(userId, angle, distance);
     }
 
     private class ViewHolder {

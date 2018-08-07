@@ -431,7 +431,7 @@ public class CreateConfActivity extends VoxeetAppCompatActivity {
     public void onEvent(ScreenStreamAddedEvent event) {
         Log.d(TAG, "onEvent: " + event.getClass().getSimpleName());
         MediaStream mediaStream = event.getMediaStream();
-        if (mediaStream != null && mediaStream.hasVideo()) { // attaching stream
+        if (mediaStream != null && mediaStream.videoTracks().size() > 0) { // attaching stream
             screenShare.setVisibility(VISIBLE);
             screenShare.attach(event.getPeer(), mediaStream);
         }
@@ -701,7 +701,7 @@ public class CreateConfActivity extends VoxeetAppCompatActivity {
         if (user.getUserId().equalsIgnoreCase(VoxeetPreferences.id())) {
             if (action == MainActivity.REPLAY)
                 addParticipant(user);
-            else if (mediaStream != null && mediaStream.hasVideo()) { //enabling own video
+            else if (mediaStream != null && mediaStream.videoTracks().size() > 0) { //enabling own video
                 videoStream.setVisibility(VISIBLE);
                 videoStream.attach(user.getUserId(), mediaStream);
             } else { // disabling own video
@@ -843,7 +843,7 @@ public class CreateConfActivity extends VoxeetAppCompatActivity {
         Picasso.with(this)
                 .load(VoxeetSdk.getInstance()
                         .getFilePresentationService()
-                        .getImageUrl(mFilePresentationStarted.getFileId(),
+                        .getImage(mFilePresentationStarted.getFileId(),
                                 page))
                 .into(presentation_lander);
     }

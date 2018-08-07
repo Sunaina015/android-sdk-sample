@@ -10,24 +10,24 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import com.voxeet.android.media.Media;
+import com.voxeet.android.media.audio.AudioRoute;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
 import fr.voxeet.sdk.sample.R;
 import voxeet.com.sdk.core.VoxeetSdk;
 
-/**
- * Created by Thomas on 08/12/2015.
- */
 public class ConferenceOutput extends DialogFragment {
     public static final String TAG = ConferenceOutput.class.getSimpleName();
 
+    @Bind(R.id.output_list_view)
     protected ListView outputListView;
 
-    private List<Media.AudioRoute> currentRoutes;
+    private List<AudioRoute> currentRoutes;
 
     private List<String> routesDescription = Arrays.asList("Headset", "Phone", "Speaker", "Bluetooth");
 
@@ -38,7 +38,7 @@ public class ConferenceOutput extends DialogFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.dialog_conference_output, container, true);
 
-        outputListView = (ListView) v.findViewById(R.id.output_list_view);
+        ButterKnife.bind(this, v);
 
         return v;
     }
@@ -50,7 +50,7 @@ public class ConferenceOutput extends DialogFragment {
         outputListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                VoxeetSdk.getInstance().getConferenceService().setAudioRoute(currentRoutes.get(position));
+                VoxeetSdk.getInstance().getAudioService().setAudioRoute(currentRoutes.get(position));
 
                 dismiss();
             }
@@ -60,16 +60,16 @@ public class ConferenceOutput extends DialogFragment {
     //this method is only called in onResume()
     //then getActivity is valid
     protected void setRoutesFromAudioSession() {
-        currentRoutes = VoxeetSdk.getInstance().getConferenceService().getAvailableRoutes();
+        currentRoutes = VoxeetSdk.getInstance().getAudioService().getAvailableRoutes();
 
         List<String> desc = new ArrayList<>();
-        for (Media.AudioRoute r : currentRoutes) {
+        for (AudioRoute r : currentRoutes) {
             desc.add(routesDescription.get(r.value()));
         }
 
         outputListView.setAdapter(new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_single_choice, desc.toArray(new String[desc.size()])));
 
-        Media.AudioRoute selectedRoute = VoxeetSdk.getInstance().getConferenceService().currentRoute();
+        AudioRoute selectedRoute = VoxeetSdk.getInstance().getAudioService().currentRoute();
 
         outputListView.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
         outputListView.setItemChecked(currentRoutes.indexOf(selectedRoute), true);
