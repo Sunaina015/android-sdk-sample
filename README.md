@@ -20,7 +20,7 @@ To install the SDK directly into your Android project using the Grade build syst
 
 ```gradle
 dependencies {
-  compile ('com.voxeet.sdk:toolkit:1.1.0') {
+  compile ('com.voxeet.sdk:toolkit:1.1.5') {
     transitive = true
   }
 }
@@ -30,7 +30,7 @@ The current logic-only (no UI) sdk is available using the following version (use
 
 ```gradle
 dependencies {
-  compile ('com.voxeet.sdk:public-sdk:1.1.0') {
+  compile ('com.voxeet.sdk:public-sdk:1.1.5') {
     transitive = true
   }
 }
@@ -50,6 +50,13 @@ A complete documentation about the Promise implementation is available on this [
 
 ### What's New ?
 
+v1.1.5 :
+  - from previous vversion, Media.AudioRoute is now AudioRoute
+  - Audio related APIs are now in `VoxeetSdk.getInstance().getAudioService()`
+  - fix issues with ids from the SDK
+  - add VideoPresentation api
+  - sample app : integration of the api and fix with butterknife
+  
 v1.1.0 :
   - various fixes (issue with speaker button)
   - add screenshare capabilities
@@ -450,77 +457,6 @@ VoxeetSdk.getInstance().getConferenceService().stopRecording()
 ```
 
 
-## Audio and video devices
-Main access: `VoxeetSdk.getInstance().getConferenceService()`
-
-
-### `getAvailableRoutes`
-Retrieves the available routes the SDK can use.
-
-#### Returns
-`List<Media.AudioRoute>` - A list of every AudioRoute.
-
-#### Example
-```java
-List<Media.AudioRoute> routes = VoxeetSdk.getInstance().getConferenceService().getAvailableRoutes();
-```
-
-
-### `getNameOfFrontFacingDevice`
-Retrieves the name of the front-facing camera.
-
-#### Returns
-`String?` - The name of the device (or "null" if unavailable).
-
-#### Example
-```java
-String front = CameraEnumerationAndroid.getNameOfBackFacingDevice();
-```
-
-
-### `getNameOfBackFacingDevice`
-Retrieves the name of the back-facing camera.
-
-#### Returns
-`String?` - The name of the device (or "null" if unavailable).
-
-#### Example
-```java
-String back = CameraEnumerationAndroid.getNameOfBackFacingDevice();
-```
-
-
-### `setDefaultCamera`
-Sets the camera device to use during the conference.
-
-**The device must be set before starting the video.**
-
-#### Parameters
--   `cameraName` **string** - The name of the camera device to use.
-
-#### Example
-```java
-VoxeetSdk.getInstance().getConferenceService()
-    .setDefaultCamera(CameraEnumerationAndroid.getNameOfBackFacingDevice());
-```
-
-### `setAudioRoute`
-Sets the AudioRoute to use when the conference is already started.
-
-**The conference must be started to use this method.**
-
-#### Parameters
--   `audioRoute` **Media.AudioRoute** - The valid AudioRoute to use.
-
-#### Returns
-`boolean` - Returns whether the output can be changed.
-
-#### Example
-```java
-VoxeetSdk.getInstance().getConferenceService()
-    .setAudioRoute(Media.AudioRoute.ROUTE_SPEAKER);
-```
-
 ### `mute`
 Mute the microphone currently in use in the conference.
 
@@ -648,6 +584,77 @@ VoxeetSdk.getInstance().getConferenceService().switchCamera()
 
                     }
                 });
+```
+
+
+
+## Audio devices
+Main access: `VoxeetSdk.getInstance().getAudioService()`
+
+
+### `getAvailableRoutes`
+Retrieves the available routes the SDK can use.
+
+#### Returns
+`List<AudioRoute>` - A list of every AudioRoute.
+
+#### Example
+```java
+List<AudioRoute> routes = VoxeetSdk.getInstance().getAudioService().getAvailableRoutes();
+```
+
+
+### `getNameOfFrontFacingDevice`
+Retrieves the name of the front-facing camera.
+
+#### Returns
+`String?` - The name of the device (or "null" if unavailable).
+
+#### Example
+```java
+String front = new CameraEnumerator(applicationContext).getNameOfFrontFacingDevice();
+```
+
+
+### `getNameOfBackFacingDevice`
+Retrieves the name of the back-facing camera.
+
+#### Returns
+`String?` - The name of the device (or "null" if unavailable).
+
+#### Example
+```java
+String back = new CameraEnumerator(applicationContext).getNameOfBackFacingDevice();
+```
+
+
+### `setDefaultCamera`
+Sets the camera device to use during the conference.
+
+**The device must be set before starting the video.**
+
+#### Parameters
+-   `cameraName` **string** - The name of the camera device to use.
+
+#### Example
+```java
+VoxeetSdk.getInstance().getAudioService().setDefaultCamera(nameOfCamera);
+```
+
+### `setAudioRoute`
+Sets the AudioRoute to use when the conference is already started.
+
+**The conference must be started to use this method.**
+
+#### Parameters
+-   `audioRoute` **AudioRoute** - The valid AudioRoute to use.
+
+#### Returns
+`boolean` - Returns whether the output can be changed.
+
+#### Example
+```java
+VoxeetSdk.getInstance().getConferenceService().setAudioRoute(AudioRoute.ROUTE_SPEAKER);
 ```
 
 
@@ -895,6 +902,125 @@ Retrives an image for a file page.
 String image_url = VoxeetSdk.getInstance().getFilePresentationService().getImage(fileId, pageId);
 ```
 
+## Video presentation
+
+### `startVideoPresentation`
+Starts a video presentation.
+
+#### Parameters
+-   `url` **string** - The direct url to the video.
+
+#### Returns
+`Promise<status: VideoPresentationStarted | Exception>` - Presentation started or exception.
+
+#### Example
+```java
+VoxeetSdk.getInstance().getVideoPresentation().VideoPresentationStarted(url)
+                .then(new PromiseExec<VideoPresentationStarted, Object>() {
+                    @Override
+                    public void onCall(@Nullable VideoPresentationStartedVideoPresentationStarted started_object, @NonNull Solver<Object> solver) {
+
+                    }
+                })
+                .error(new ErrorPromise() {
+                    @Override
+                    public void onError(@NonNull Throwable throwable) {
+
+                    }
+                });
+```
+
+
+### `stopPresentation`
+Stops the current video presentation.
+
+#### Returns
+`Promise<status: VideoPresentationStopped | Exception>` - Presentation stopped or exception.
+
+#### Example
+```java
+VoxeetSdk.getInstance().getVideoPresentationService().stopVideoPresentation()
+                .then(new PromiseExec<VideoPresentationStopped, Object>() {
+                    @Override
+                    public void onCall(@Nullable VideoPresentationStopped stopped_object, @NonNull Solver<Object> solver) {
+
+                    }
+                })
+                .error(new ErrorPromise() {
+                    @Override
+                    public void onError(@NonNull Throwable throwable) {
+
+                    }
+                });
+```
+
+### `playVideoPresentation`
+Play the video.
+
+#### Returns
+`Promise<status: VideoPresentationPlay | Exception>` - The presentation's video plays.
+
+#### Example
+```java
+VoxeetSdk.getInstance().getVideoPresentationService().playVideoPresentation()
+                .then(new PromiseExec<VideoPresentationPlay, Object>() {
+                    @Override
+                    public void onCall(@Nullable VideoPresentationPlay updated_presentation, @NonNull Solver<Object> solver) {
+
+                    }
+                })
+                .error(new ErrorPromise() {
+                    @Override
+                    public void onError(@NonNull Throwable throwable) {
+
+                    }
+                });
+```
+### `pauseVideoPresentation`
+Pause the video.
+
+#### Returns
+`Promise<status: VideoPresentationPaused | Exception>` - The presentation's video is now paused.
+
+#### Example
+```java
+VoxeetSdk.getInstance().getVideoPresentationService().pauseVideoPresentation()
+                .then(new PromiseExec<VideoPresentationPaused, Object>() {
+                    @Override
+                    public void onCall(@Nullable VideoPresentationPaused updated_presentation, @NonNull Solver<Object> solver) {
+
+                    }
+                })
+                .error(new ErrorPromise() {
+                    @Override
+                    public void onError(@NonNull Throwable throwable) {
+
+                    }
+                });
+```
+
+### `seekVideoPresentation`
+Change the current timestamp of the video.
+
+#### Returns
+`Promise<status: VideoPresentationSeek | Exception>` - The presentation's video plays.
+
+#### Example
+```java
+VoxeetSdk.getInstance().getVideoPresentationService().seekVideoPresentation()
+                .then(new PromiseExec<VideoPresentationSeek, Object>() {
+                    @Override
+                    public void onCall(@Nullable VideoPresentationSeek updated_presentation, @NonNull Solver<Object> solver) {
+
+                    }
+                })
+                .error(new ErrorPromise() {
+                    @Override
+                    public void onError(@NonNull Throwable throwable) {
+
+                    }
+                });
+```
 
 ## ScreenShare
 Main access: `VoxeetSdk.getInstance().getScreenShareService()`
@@ -1181,6 +1307,22 @@ Sent when a file presentation is dispatched from the server.
 #### `FilePresentationStopEvent`
 Sent when a file presentation stops from the server.
 
+### Video presentation events
+
+*Note : those events must be managed in the UI to reflect the actions on the player ( for instance `Android's VideoView` )*
+
+#### `VideoPresentationStartedEvent`
+Sent when a Video Presentation begins in the conference
+
+#### `VideoPresentationPlayEvent`
+Sent when the presented video plays
+
+#### `VideoPresentationPausedEvent`
+Sent when the presented video is now paused
+
+#### `VideoPresentationSeekEvent`
+Sent when the presented video current timestamp changes
+
 
 ## Conference event flow
 
@@ -1207,8 +1349,8 @@ Only one instance of a conference is allowed to be live. Leaving the current con
 ## Version
 
 
-public-sdk: 1.1.0
-toolkit: 1.1.0
+public-sdk: 1.1.5
+toolkit: 1.1.5
 
 ## Tech
 
