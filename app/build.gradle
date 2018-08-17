@@ -74,7 +74,7 @@ dependencies {
     annotationProcessor 'com.jakewharton:butterknife:7.0.1'
     implementation 'com.jakewharton:butterknife:7.0.1'
 
-    compile ('com.voxeet.sdk:toolkit:1.1.5') {
+    compile ('com.voxeet.sdk:toolkit:1.1.5.8') {
         transitive = true
     }
 }
