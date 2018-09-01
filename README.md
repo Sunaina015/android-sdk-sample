@@ -20,7 +20,7 @@ To install the SDK directly into your Android project using the Grade build syst
 
 ```gradle
 dependencies {
-  compile ('com.voxeet.sdk:toolkit:1.1.5') {
+  compile ('com.voxeet.sdk:toolkit:1.1.7.1.1') {
     transitive = true
   }
 }
@@ -30,7 +30,7 @@ The current logic-only (no UI) sdk is available using the following version (use
 
 ```gradle
 dependencies {
-  compile ('com.voxeet.sdk:public-sdk:1.1.5') {
+  compile ('com.voxeet.sdk:public-sdk:1.1.7.1') {
     transitive = true
   }
 }
@@ -50,13 +50,22 @@ A complete documentation about the Promise implementation is available on this [
 
 ### What's New ?
 
+v1.1.7.1.1 :
+  - fix a crash when SDK is not initialized and using `VoxeetAppCompatActivity`
+
+v1.1.7.1 :
+  - fix overlay behaviour
+
+v1.1.6 :
+  - new Media management
+
 v1.1.5 :
   - from previous vversion, Media.AudioRoute is now AudioRoute
   - Audio related APIs are now in `VoxeetSdk.getInstance().getAudioService()`
   - fix issues with ids from the SDK
   - add VideoPresentation api
   - sample app : integration of the api and fix with butterknife
-  
+
 v1.1.0 :
   - various fixes (issue with speaker button)
   - add screenshare capabilities
@@ -1349,8 +1358,8 @@ Only one instance of a conference is allowed to be live. Leaving the current con
 ## Version
 
 
-public-sdk: 1.1.5
-toolkit: 1.1.5
+public-sdk: 1.1.7.1
+toolkit: 1.1.7.1.1
 
 ## Tech
 
