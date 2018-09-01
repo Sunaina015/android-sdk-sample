@@ -20,27 +20,7 @@ import voxeet.com.sdk.json.UserInfo;
 public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder> {
 
     private UserClickListener _listener;
-
-    public void setSelected(UserInfo currentUser) {
-        for (UserItem user_item : _user_items) {
-            user_item.setSelected(user_item.getUserInfo().equals(currentUser));
-        }
-
-        notifyDataSetChanged();
-    }
-
-    public interface UserClickListener {
-        void onUserSelected(UserItem user_item);
-    }
-
     private UserItem[] _user_items;
-
-    @Override
-    public UserViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-
-        return new UserViewHolder(inflater.inflate(R.layout.recycler_main_user_info, parent, false));
-    }
 
     private UserAdapter() {
 
@@ -51,6 +31,21 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
 
         _listener = listener;
         _user_items = user_items;
+    }
+
+    public void setSelected(UserInfo currentUser) {
+        for (UserItem user_item : _user_items) {
+            user_item.setSelected(user_item.getUserInfo().equals(currentUser));
+        }
+
+        notifyDataSetChanged();
+    }
+
+    @Override
+    public UserViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+
+        return new UserViewHolder(inflater.inflate(R.layout.recycler_main_user_info, parent, false));
     }
 
     private void onClickItemAtPosition(int position) {
@@ -79,6 +74,10 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
     @Override
     public int getItemCount() {
         return _user_items.length;
+    }
+
+    public interface UserClickListener {
+        void onUserSelected(UserItem user_item);
     }
 
     public class UserViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {

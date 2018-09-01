@@ -1,21 +1,27 @@
 apply plugin: 'com.android.application'
 
 repositories {
-    maven { url 'https://dl.bintray.com/voxeet/maven' }
     jcenter()
 }
 
+def oauth_url="\"\""
+
+if(project.hasProperty("USE_SDK_OAUTH_URL")) {
+    oauth_url="\"" + project.properties["USE_SDK_OAUTH_URL"]+"\""
+}
+
+
 android {
     compileSdkVersion 26
-    buildToolsVersion "26.0.2"
+    buildToolsVersion "26.0.3"
 
     defaultConfig {
         applicationId "fr.voxeet.sdk.sample"
         minSdkVersion 16
         targetSdkVersion 26
-        versionCode 1
+        versionCode 20180901
         multiDexEnabled true
-        versionName "1.1"
+        versionName "1.1.7.1"
     }
 
     buildTypes {
@@ -32,12 +38,16 @@ android {
             dimension "develop"
             buildConfigField "String", "CONSUMER_KEY", "\"" + project.properties["PROD_CONSUMER_KEY"]+"\""
             buildConfigField "String", "CONSUMER_SECRET", "\"" + project.properties["PROD_CONSUMER_KEY"]+"\""
+
+            buildConfigField "String", "USE_SDK_OAUTH_URL", oauth_url
         }
 
         production {
             dimension "develop"
             buildConfigField "String", "CONSUMER_KEY", "\"" + project.properties["PROD_CONSUMER_KEY"]+"\""
             buildConfigField "String", "CONSUMER_SECRET", "\"" + project.properties["PROD_CONSUMER_SECRET"]+"\""
+
+            buildConfigField "String", "USE_SDK_OAUTH_URL", oauth_url
         }
     }
 
@@ -65,16 +75,21 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    testCompile 'junit:junit:4.12'
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    testImplementation 'junit:junit:4.12'
 
-    compile 'com.android.support:multidex:1.0.3'
-    compile 'com.android.support:design:26.1.0'
+    implementation 'com.android.support:multidex:1.0.3'
+    implementation 'com.android.support:design:26.1.0'
 
     annotationProcessor 'com.jakewharton:butterknife:7.0.1'
     implementation 'com.jakewharton:butterknife:7.0.1'
 
-    compile ('com.voxeet.sdk:toolkit:1.1.5.8') {
+    //when working with our oauth example
+    //this converter is here to convert "string" only result
+    //if a regular json is sent, please use Jackson
+    implementation 'com.squareup.retrofit2:converter-scalars:2.1.0'
+
+    implementation ('com.voxeet.sdk:toolkit:1.1.7.1.1') {
         transitive = true
     }
 }

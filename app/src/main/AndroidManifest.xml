@@ -50,13 +50,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".activities.CreateConfActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize"
-            android:label="@string/create_conf"
-            android:theme="@style/AppTheme.NoActionBar"/>
 
-        <activity android:name=".activities.TryoutActivity" />
         <activity android:name=".activities.IncomingCallActivity" />
 
     </application>

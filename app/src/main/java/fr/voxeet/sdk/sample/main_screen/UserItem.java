@@ -5,7 +5,7 @@ import android.support.annotation.DrawableRes;
 import voxeet.com.sdk.json.UserInfo;
 
 /**
- * Created by kevinleperf on 24/11/2017.
+ * Describe the state of a un/-selected user
  */
 
 public class UserItem {
@@ -35,11 +35,11 @@ public class UserItem {
         return _user_info;
     }
 
-    public void setSelected(boolean selected) {
-        _selected = selected;
-    }
-
     public boolean isSelected() {
         return _selected;
+    }
+
+    public void setSelected(boolean selected) {
+        _selected = selected;
     }
 }
