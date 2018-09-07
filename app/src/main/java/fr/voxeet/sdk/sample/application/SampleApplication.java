@@ -81,12 +81,13 @@ public class SampleApplication extends MultiDexApplication {
      * @return true if it was the first log
      */
     public boolean selectUser(UserInfo user_info) {
+        UserInfo previous_user_info = _current_user;
         //first case, the user was disconnected
         _current_user = user_info;
-        if (_current_user == null || !sdkInitialized) {
-            if (!useOauthFeature()) {
-                logSelectedUser();
-            } else {
+
+        //if no user was logged in or the sdk was not initialized
+        if (previous_user_info == null || !sdkInitialized) {
+            if (null == VoxeetSdk.getInstance()) {
                 //if we are in a OAuth management, we must wait for the initialization
                 //and then, log the user !
                 initializeSdk().then(new PromiseExec<Boolean, Object>() {
@@ -101,6 +102,8 @@ public class SampleApplication extends MultiDexApplication {
                         Toast.makeText(SampleApplication.this, "Error while retrieving the accessToken or login ; please see logs", Toast.LENGTH_SHORT).show();
                     }
                 });
+            } else {
+                logSelectedUser();
             }
         } else {
             //we have an user
