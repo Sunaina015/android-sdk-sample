@@ -3,12 +3,7 @@ package fr.voxeet.sdk.sample.oauth;
 import android.support.annotation.NonNull;
 
 import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
-
-/**
- * Created by kevinleperf on 23/07/2018.
- */
 
 public class OAuthCallsFactory {
 
@@ -25,7 +20,6 @@ public class OAuthCallsFactory {
     @NonNull
     public static OAuthCalls createOAuthCalls(@NonNull String url) {
         return new Retrofit.Builder()
-                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .addConverterFactory(ScalarsConverterFactory.create())
                 .baseUrl(url)
                 .build()

@@ -6,6 +6,11 @@ import android.support.multidex.MultiDexApplication;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.voxeet.toolkit.activities.notification.DefaultIncomingCallActivity;
+import com.voxeet.toolkit.controllers.VoxeetToolkit;
+import com.voxeet.toolkit.implementation.overlays.OverlayState;
+import com.voxeet.toolkit.utils.EventDebugger;
+
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.concurrent.Callable;
@@ -17,16 +22,11 @@ import eu.codlab.simplepromise.solve.PromiseExec;
 import eu.codlab.simplepromise.solve.PromiseSolver;
 import eu.codlab.simplepromise.solve.Solver;
 import fr.voxeet.sdk.sample.BuildConfig;
-import fr.voxeet.sdk.sample.activities.IncomingCallActivity;
 import fr.voxeet.sdk.sample.oauth.OAuthCalls;
 import fr.voxeet.sdk.sample.oauth.OAuthCallsFactory;
-import rx.Observable;
-import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
-import sdk.voxeet.com.toolkit.main.VoxeetToolkit;
-import sdk.voxeet.com.toolkit.utils.EventDebugger;
-import sdk.voxeet.com.toolkit.views.uitookit.sdk.overlays.OverlayState;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import voxeet.com.sdk.core.VoxeetSdk;
 import voxeet.com.sdk.core.preferences.VoxeetPreferences;
 import voxeet.com.sdk.json.UserInfo;
@@ -168,7 +168,7 @@ public class SampleApplication extends MultiDexApplication {
                             new Callable<String>() {
                                 @Override
                                 public String call() throws Exception {
-                                    String token = createOAuthCalls().retrieveRefreshToken().toBlocking().single();
+                                    String token = createOAuthCalls().retrieveRefreshToken().execute().body();
                                     //when using the Web Sample, the tokens are surrounded by "
                                     //we remove them here, but in production, it should be injected into your objects
                                     if (null != token) token = token.replaceAll("\"", "");
@@ -188,7 +188,7 @@ public class SampleApplication extends MultiDexApplication {
     private void onSdkInitialized() {
         VoxeetSdk.getInstance().getConferenceService().setTimeOut(ONE_MINUTE);
 
-        VoxeetPreferences.setDefaultActivity(IncomingCallActivity.class.getCanonicalName());
+        VoxeetPreferences.setDefaultActivity(DefaultIncomingCallActivity.class.getCanonicalName());
         //register the Application and add at least one subscriber
         VoxeetSdk.getInstance().register(this, this);
 
@@ -222,37 +222,30 @@ public class SampleApplication extends MultiDexApplication {
     /**
      * Retrieve the current third party accessToken given the OAuthCalls interface
      *
-     * @return
+     * @return a promise which resolve the current access token
      */
     private Promise<String> retrieveAccessToken() {
         return new Promise<>(new PromiseSolver<String>() {
             @Override
             public void onCall(@NonNull Solver<String> solver) {
-                Observable<String> call = createOAuthCalls().retrieveAccessToken();
-                call.subscribeOn(Schedulers.newThread())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new Subscriber<String>() {
-                            @Override
-                            public void onCompleted() {
+                Call<String> call = createOAuthCalls().retrieveAccessToken();
+                call.enqueue(new Callback<String>() {
+                    @Override
+                    public void onResponse(Call<String> call, Response<String> response) {
+                        //when using the Web Sample, the tokens are surrounded by "
+                        //we remove them here, but in production, it should be injected into your objects
+                        String accessToken = null != response ? response.body() : null;
+                        if (null != accessToken)
+                            accessToken = accessToken.replaceAll("\"", "");
+                        solver.resolve(accessToken);
+                    }
 
-                            }
-
-                            @Override
-                            public void onError(Throwable e) {
-                                solver.reject(e);
-                            }
-
-                            @Override
-                            public void onNext(String accessToken) {
-                                //when using the Web Sample, the tokens are surrounded by "
-                                //we remove them here, but in production, it should be injected into your objects
-                                if (null != accessToken)
-                                    accessToken = accessToken.replaceAll("\"", "");
-                                solver.resolve(accessToken);
-                            }
-                        });
+                    @Override
+                    public void onFailure(Call<String> call, Throwable e) {
+                        solver.reject(e);
+                    }
+                });
             }
         });
     }
-
 }

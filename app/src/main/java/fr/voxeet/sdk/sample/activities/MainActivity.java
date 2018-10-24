@@ -16,6 +16,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.voxeet.toolkit.activities.VoxeetAppCompatActivity;
+import com.voxeet.toolkit.controllers.VoxeetToolkit;
+
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -35,8 +38,6 @@ import fr.voxeet.sdk.sample.application.SampleApplication;
 import fr.voxeet.sdk.sample.main_screen.UserAdapter;
 import fr.voxeet.sdk.sample.main_screen.UserItem;
 import fr.voxeet.sdk.sample.users.UsersHelper;
-import sdk.voxeet.com.toolkit.activities.workflow.VoxeetAppCompatActivity;
-import sdk.voxeet.com.toolkit.main.VoxeetToolkit;
 import voxeet.com.sdk.core.VoxeetSdk;
 import voxeet.com.sdk.core.preferences.VoxeetPreferences;
 import voxeet.com.sdk.events.success.ConferenceJoinedSuccessEvent;
@@ -203,22 +204,6 @@ public class MainActivity extends VoxeetAppCompatActivity implements UserAdapter
             //startActivity(_after_relogged_intent);
             _after_relogged_intent = null;
         }
-
-        VoxeetSdk.getInstance()
-                .getConferenceService()
-                .subscribe("test_conference")
-                .then(new PromiseExec<Boolean, Object>() {
-                    @Override
-                    public void onCall(@Nullable Boolean result, @NonNull Solver<Object> solver) {
-                        Log.d(TAG, "onCall: subscribe result " + result);
-                    }
-                })
-                .error(new ErrorPromise() {
-                    @Override
-                    public void onError(@NonNull Throwable error) {
-                        error.printStackTrace();
-                    }
-                });
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

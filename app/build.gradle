@@ -12,16 +12,16 @@ if(project.hasProperty("USE_SDK_OAUTH_URL")) {
 
 
 android {
-    compileSdkVersion 26
-    buildToolsVersion "26.0.3"
+    compileSdkVersion 27
+    buildToolsVersion "27.0.1"
 
     defaultConfig {
         applicationId "fr.voxeet.sdk.sample"
         minSdkVersion 16
-        targetSdkVersion 26
+        targetSdkVersion 27
         versionCode 20180901
         multiDexEnabled true
-        versionName "1.1.7.1"
+        versionName "1.1.8.24"
     }
 
     buildTypes {
@@ -78,8 +78,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     testImplementation 'junit:junit:4.12'
 
-    implementation 'com.android.support:multidex:1.0.3'
-    implementation 'com.android.support:design:26.1.0'
+    implementation 'com.android.support:design:27.1.1'
 
     annotationProcessor 'com.jakewharton:butterknife:7.0.1'
     implementation 'com.jakewharton:butterknife:7.0.1'
@@ -89,7 +88,7 @@ dependencies {
     //if a regular json is sent, please use Jackson
     implementation 'com.squareup.retrofit2:converter-scalars:2.1.0'
 
-    implementation ('com.voxeet.sdk:toolkit:1.1.7.1.1') {
+    implementation ('com.voxeet.sdk:toolkit:1.1.8.24') {
         transitive = true
     }
 }

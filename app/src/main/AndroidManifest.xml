@@ -51,7 +51,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".activities.IncomingCallActivity" />
+        <activity android:name="com.voxeet.toolkit.activities.notification.DefaultIncomingCallActivity" />
 
     </application>
 
