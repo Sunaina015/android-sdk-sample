@@ -35,11 +35,11 @@ public class UserItem {
         return _user_info;
     }
 
-    public boolean isSelected() {
-        return _selected;
-    }
-
     public void setSelected(boolean selected) {
         _selected = selected;
+    }
+
+    public boolean isSelected() {
+        return _selected;
     }
 }

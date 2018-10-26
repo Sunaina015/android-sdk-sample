@@ -1,8 +1,6 @@
 package fr.voxeet.sdk.sample.activities;
 
 import android.Manifest;
-import android.app.Activity;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -10,11 +8,9 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import com.voxeet.toolkit.activities.VoxeetAppCompatActivity;
 import com.voxeet.toolkit.controllers.VoxeetToolkit;
@@ -23,7 +19,6 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.util.Arrays;
 import java.util.List;
 
 import butterknife.Bind;
@@ -45,16 +40,15 @@ import voxeet.com.sdk.events.success.ConferenceRefreshedEvent;
 import voxeet.com.sdk.events.success.SocketConnectEvent;
 import voxeet.com.sdk.events.success.SocketStateChangeEvent;
 import voxeet.com.sdk.json.UserInfo;
+import voxeet.com.sdk.json.internal.MetadataHolder;
 
 public class MainActivity extends VoxeetAppCompatActivity implements UserAdapter.UserClickListener {
-    private static final String TAG = MainActivity.class.getSimpleName();
 
     private static final int RECORD_AUDIO_RESULT = 0x20;
-    private static final int REQUEST_EXTERNAL_STORAGE = 0x21;
-    private final static String[] PERMISSIONS_STORAGE = {
-            Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
-    };
+
+    @Bind(R.id.join_conf_text)
+    EditText joinConfEditText;
+
     @Bind(R.id.join_conf)
     protected Button joinConf;
 
@@ -64,39 +58,7 @@ public class MainActivity extends VoxeetAppCompatActivity implements UserAdapter
     @Bind(R.id.recycler_users)
     protected RecyclerView users;
 
-    @Bind(R.id.join_conf_text)
-    EditText joinConfEditText;
-
-    //In the example, this field will be set to true when "starting" a conference after login
-    private boolean _start_after_log_event = false;
-    private Intent _after_relogged_intent = null;
-
     private SampleApplication _application;
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case RECORD_AUDIO_RESULT: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                    joinCall();
-                }
-                return;
-            }
-            case REQUEST_EXTERNAL_STORAGE: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                    Toast.makeText(this, "Storage granted", Toast.LENGTH_SHORT).show();
-                }
-                return;
-            }
-        }
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,10 +69,6 @@ public class MainActivity extends VoxeetAppCompatActivity implements UserAdapter
         EventBus.getDefault().register(this);
 
         ButterKnife.bind(this);
-
-        verifyStoragePermissions(this);
-
-        Log.d(TAG, "onCreate: users ? " + users);
 
         users.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
 
@@ -140,31 +98,77 @@ public class MainActivity extends VoxeetAppCompatActivity implements UserAdapter
                 });
     }
 
-    public void verifyStoragePermissions(Activity context) {
-        // Check if we have write permission
-        int permission = ActivityCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String[] permissions, int[] grantResults) {
 
-        if (permission != PackageManager.PERMISSION_GRANTED) {
-            // We don't have permission so prompt the user
-            ActivityCompat.requestPermissions(
-                    context,
-                    PERMISSIONS_STORAGE,
-                    REQUEST_EXTERNAL_STORAGE
-            );
+        switch (requestCode) {
+            case RECORD_AUDIO_RESULT: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    joinCall();
+                }
+                return;
+            }
+            default:
+                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
     }
 
-    private void joinCall() {
-        conferenceActivity();
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (getApplication() instanceof SampleApplication) {
+            _application = (SampleApplication) getApplication();
+        }
     }
 
-    public void conferenceActivity() {
+    @Override
+    protected void onPause() {
+        EventBus.getDefault().unregister(this);
+
+        super.onPause();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (null != VoxeetSdk.getInstance() && VoxeetSdk.getInstance().getConferenceService().isLive()) {
+            VoxeetSdk.getInstance().getConferenceService().leave()
+                    .then(new PromiseExec<Boolean, Object>() {
+                        @Override
+                        public void onCall(@Nullable Boolean result, @NonNull Solver<Object> solver) {
+
+                        }
+                    })
+                    .error(new ErrorPromise() {
+                        @Override
+                        public void onError(@NonNull Throwable error) {
+
+                        }
+                    });
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
+    public void onUserSelected(UserItem user_item) {
+        _application.selectUser(user_item.getUserInfo());
+    }
+
+    private void joinCall() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED)
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, RECORD_AUDIO_RESULT);
         else {
             String conferenceAlias = joinConfEditText.getText().toString();
 
-            Promise<Boolean> promise = VoxeetToolkit.getInstance().getConferenceToolkit().join(conferenceAlias);
+            VoxeetToolkit.getInstance().enable(VoxeetToolkit.getInstance().getReplayMessageToolkit());
+
+            Promise<Boolean> promise = VoxeetToolkit.getInstance().getConferenceToolkit().join(conferenceAlias,
+                    new MetadataHolder().setStats(true));
 
             if (VoxeetSdk.getInstance().getConferenceService().isLive()) {
                 Promise<Boolean> finalPromise = promise;
@@ -194,22 +198,15 @@ public class MainActivity extends VoxeetAppCompatActivity implements UserAdapter
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(final SocketConnectEvent event) {
-        Log.d("MainActivity", "SocketConnectEvent" + event.message());
         joinConf.setEnabled(true);
         disconnect.setVisibility(View.VISIBLE);
 
+        //TODO onResume select the current logged user
         ((UserAdapter) users.getAdapter()).setSelected(_application.getCurrentUser());
-
-        if (_start_after_log_event && _after_relogged_intent != null) {
-            //startActivity(_after_relogged_intent);
-            _after_relogged_intent = null;
-        }
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(SocketStateChangeEvent event) {
-        Log.d("MainActivity", "SocketStateChangeEvent " + event.message());
-
         switch (event.message()) {
             case "CLOSING":
             case "CLOSED":
@@ -219,44 +216,8 @@ public class MainActivity extends VoxeetAppCompatActivity implements UserAdapter
         }
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        if (getApplication() instanceof SampleApplication) {
-            _application = (SampleApplication) getApplication();
-        }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-        EventBus.getDefault().unregister(this);
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (VoxeetToolkit.getInstance().getReplayMessageToolkit().isShowing()) {
-            VoxeetSdk.getInstance().getConferenceService().leave();
-        } else {
-            super.onBackPressed();
-        }
-    }
-
-    @Override
-    public void onUserSelected(UserItem user_item) {
-        _application.selectUser(user_item.getUserInfo());
-    }
-
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(final ConferenceJoinedSuccessEvent event) {
-        Log.d("CreateConfActivity", "ConferencejoinedSuccessEvent " + event.getConferenceId() + " " + event.getAliasId());
         List<UserInfo> external_ids = UsersHelper.getExternalIds(VoxeetPreferences.id());
 
         VoxeetToolkit.getInstance().getConferenceToolkit()
@@ -264,7 +225,7 @@ public class MainActivity extends VoxeetAppCompatActivity implements UserAdapter
                 .then(new PromiseExec<List<ConferenceRefreshedEvent>, Object>() {
                     @Override
                     public void onCall(@Nullable List<ConferenceRefreshedEvent> result, @NonNull Solver<Object> solver) {
-                        Log.d(TAG, "onCall: " + Arrays.toString(result.toArray()));
+
                     }
                 })
                 .error(new ErrorPromise() {
