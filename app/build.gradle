@@ -22,7 +22,7 @@ android {
         targetSdkVersion 27
         versionCode 20180901
         multiDexEnabled true
-        versionName "1.1.8.24"
+        versionName "1.1.8.26"
     }
 
     buildTypes {
@@ -89,7 +89,7 @@ dependencies {
     //if a regular json is sent, please use Jackson
     implementation 'com.squareup.retrofit2:converter-scalars:2.1.0'
 
-    implementation ('com.voxeet.sdk:toolkit:1.1.8.24') {
+    implementation ('com.voxeet.sdk:toolkit:1.1.8.26') {
         transitive = true
     }
 }
