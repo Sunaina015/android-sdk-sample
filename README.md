@@ -185,6 +185,68 @@ ActivityCompat.requestPermissions(this,
 
 See the [Official Android Documentation] for more details.
 
+### Application initialization
+
+To help you integrate the SDK, we provide the `VoxeetApplication`, this class ensures that you'll initialize the SDK and have a fully integrated experience as developer to enrich your UX.
+
+This class makes mandatory to return a `Promise` which will `resolve` as soon as the SDK is initialized. A simple implementation is :
+This method will then be internally used by the various components of the SDK.
+
+```
+    @NonNull
+    @Override
+    public Promise<Boolean> uniqueInitializeSDK() {
+        return new Promise<>(new PromiseSolver<Boolean>() {
+            @Override
+            public void onCall(@NonNull Solver<Boolean> solver) {
+                VoxeetSdk.initialize(SampleApplication.this,
+                        BuildConfig.CONSUMER_KEY,
+                        BuildConfig.CONSUMER_SECRET,
+                        _current_user);
+
+                solver.resolve(true);
+            }
+        });
+    }
+```
+
+### Activity management
+
+Every activities extending the `VoxeetAppCompatActivity` will manage the incoming call invitation and the accepted calls.
+
+### Incoming call management
+
+The sample provides a way to easily deal with the incoming calls. The SDK can be configured to reflect the configuration.
+To help integrate with the below FCM configuration, it's also possible to set default values into the AndroidManifest.
+
+Add 2 *<meta-data />* values in the Manifest to reflect the :
+  - incoming call activity
+  - default activity to start when the call is accepted
+
+The value of each of those *<meta-data />* needs to be the fully qualified name of those. For instance :
+
+```
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <!-- if a push notification is received from a killed-state app, the accept/declined calls will arrive there -->
+        <!-- Note : any override in the code will replace this metadata -->
+        <meta-data
+            android:name="voxeet_incoming_class"
+            android:value="com.voxeet.toolkit.activities.notification.DefaultIncomingCallActivity" />
+
+        <!-- if a push notification is received from killed-state app, accepted calls will arrive there // possible override in code -->
+        <!-- Note : any VoxeetAppCompat activity started will override this metadata -->
+        <meta-data
+            android:name="voxeet_incoming_accepted_class"
+            android:value="fr.voxeet.sdk.sample.activities.MainActivity" />
+
+    </application>
+
+</manifest>
+```
+
+
 ### FCM
 
 Please notice the following steps are required only if you plan on using fcm.
