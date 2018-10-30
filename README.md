@@ -320,7 +320,15 @@ VoxeetSdk.getInstance().getConferenceService().isLive()
 
 It is possible to retrieve the conference information using 2 solutions.
 
-### Get (pull) the conference information
+### Pull the conference information from the local WebRTC instance
+
+The documentation concerning the Local Stats are available in the [Stats.md](Stats.md) file
+
+- usage
+- result
+- behaviour
+
+### Get (pull) the conference information from the server
 
 This method will make a network call to get the information. The method `getConferenceStatus` available in the `ConferenceService`.
 The obtained promise resolves a `GetConferenceStatusEvent`
