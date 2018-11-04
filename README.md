@@ -20,7 +20,7 @@ To install the SDK directly into your Android project using the Grade build syst
 
 ```gradle
 dependencies {
-  compile ('com.voxeet.sdk:toolkit:1.1.8.27') {
+  compile ('com.voxeet.sdk:toolkit:1.1.8.32') {
     transitive = true
   }
 }
@@ -30,7 +30,7 @@ The current logic-only (no UI) sdk is available using the following version (use
 
 ```gradle
 dependencies {
-  compile ('com.voxeet.sdk:public-sdk:1.1.8.27') {
+  compile ('com.voxeet.sdk:public-sdk:1.1.8.32') {
     transitive = true
   }
 }
@@ -49,6 +49,13 @@ SDK.method.call()
 A complete documentation about the Promise implementation is available on this [Github](https://github.com/codlab/android_promise)
 
 ### What's New ?
+
+v1.1.8.32 :
+  - add localstats with support of auto management and report event
+
+v1.1.8.28/31 :
+  - fix default toolkit behaviour
+  - add local stats management
 
 v1.1.8.27 :
   - fix incoming calls issues
@@ -326,7 +333,7 @@ The documentation concerning the Local Stats are available in the [Stats.md](Sta
 
 - usage
 - result
-- behaviour
+- behaviour 
 
 ### Get (pull) the conference information from the server
 
@@ -414,8 +421,8 @@ In the case of network failure of any remote user, the server will try to reconn
 ## Version
 
 
-public-sdk: 1.1.8.27
-toolkit: 1.1.7.8.27
+public-sdk: 1.1.8.32
+toolkit: 1.1.7.8.32
 
 ## Tech
 
