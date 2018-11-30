@@ -268,12 +268,12 @@ To enable Voxeet notifications (getting a new call, conference ended and so on..
 <manifest>
   <application>
     <service android:name="voxeet.com.sdk.firebase.VoxeetFirebaseMessagingService">
-      <intent-filter>
+      <intent-filter android:priority="999">
         <action android:name="com.google.firebase.MESSAGING_EVENT" />
       </intent-filter>
     </service>
     <service android:name="voxeet.com.sdk.firebase.VoxeetFirebaseInstanceIDService">
-      <intent-filter>
+      <intent-filter android:priority="999">
         <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
       </intent-filter>
     </service>
